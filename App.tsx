@@ -1,14 +1,27 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import Btn from "./src/components/Btn";
+import {NavigationContainer} from "@react-navigation/native";
+import {SafeAreaView} from "react-native";
+import PersonalInfo from "./src/screens/PersonalInfo";
+import React from "react";
+import MeetingProfile from "./src/screens/MeetingProfile";
+import ReadingProfile2 from "./src/screens/ReadingProfile2";
+import Profile from "./src/screens/Profile";
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app bae!</Text>
-      <Btn label={"COUCOU BEBEW"} onClick={() => console.log("Je t'aime")} />
+    <SafeAreaView style={{flex: 1}}>
       <StatusBar style="auto" />
-    </View>
+      {/* <View style={styles.container}>
+        <Text>Open up App.tsx to start working on your app bae!</Text>
+        <Btn label={"COUCOU BEBEW"} onClick={() => console.log("Je t'aime")} />
+      </View> */}
+      {/* <PersonalInfo /> */}
+      {/* <MeetingProfile /> */}
+      {/* <ReadingProfile2 /> */}
+      <Profile />
+    </SafeAreaView>
   );
 }
 
