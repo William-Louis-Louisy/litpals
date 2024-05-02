@@ -8,11 +8,14 @@ import {
   Platform,
 } from "react-native";
 import Checkbox from "expo-checkbox";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-native-element-dropdown";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { FIREBASE_AUTH } from "../../firebaseConfig";
+import { showToast } from "../utils/Toasts";
 
 const defaultUserInfo = {
   gender: "",
@@ -26,6 +29,36 @@ const MeetingProfile = () => {
 
   const onPressFunction = () => {
     console.log("I was pressed");
+  };
+
+  useEffect(() => {
+    try {
+      onAuthStateChanged(FIREBASE_AUTH, (user) => {
+        if (user) {
+          console.log("LOGGED USER", user);
+
+          // User is signed in, see docs for a list of available properties
+          // https://firebase.google.com/docs/reference/js/auth.user
+          const uid = user.uid;
+          // ...
+        } else {
+          // User is signed out
+          // ...
+          console.log("USER IN NOT LOGGED IN");
+        }
+      });
+    } catch (error: any) {
+      console.log("bllop", error.code);
+    }
+  }, []);
+
+  const handleLogOut = async () => {
+    try {
+      const reponse = await signOut(FIREBASE_AUTH);
+      console.log("LOG OUT RESPONSE", reponse);
+    } catch (error: any) {
+      console.log(error.code);
+    }
   };
 
   return (
@@ -68,6 +101,10 @@ const MeetingProfile = () => {
           </View>
         </View>
       </View>
+
+      <Pressable style={styles.btnPrimary} onPress={handleLogOut}>
+        <Text style={styles.btnText}>Log out</Text>
+      </Pressable>
 
       {/* <Dropdown
             data={accountTypes}
@@ -119,22 +156,22 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   settingsCheckbox: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between'
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   card: {
-    backgroundColor: 'rgba(255, 222, 173, .5)',
+    backgroundColor: "rgba(255, 222, 173, .5)",
     borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 30,
   },
   tagsContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 5,
-    marginTop: 5
+    marginTop: 5,
   },
   tag: {
     borderWidth: 1,
@@ -142,10 +179,10 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
-    color: 'teal',
+    color: "teal",
     flexGrow: 1,
-    maxWidth: '50%',
-    textAlign: 'center'
+    maxWidth: "50%",
+    textAlign: "center",
   },
   btnOutlineDiscreet: {
     borderWidth: 1,

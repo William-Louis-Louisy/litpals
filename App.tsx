@@ -10,8 +10,29 @@ import ReadingProfile from "./src/screens/ReadingProfile";
 import ReadingProfile2 from "./src/screens/ReadingProfile2";
 import Profile from "./src/screens/Profile";
 import Bookshelf from "./src/screens/Bookshelf";
+import SignIn from "./src/screens/SignIn";
+import Toast, { BaseToast } from "react-native-toast-message";
 
 export default function App() {
+  const CustomToast = ({ text1, text2 }: { text1: string; text2: string }) => (
+    <BaseToast
+      style={{
+        borderLeftColor: "red",
+        borderLeftWidth: 4,
+        height: 80,
+        width: "90%",
+      }}
+      contentContainerStyle={{ gap: 5 }}
+      text1Style={{ fontSize: 20, color: "red" }}
+      text2Style={{ fontSize: 16 }}
+      // text2NumberOfLines={4}
+      text1={text1}
+      text2={text2}
+    />
+  );
+
+  const toastConfig = { error: (props: any) => <CustomToast {...props} /> };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar style="auto" />
@@ -19,12 +40,14 @@ export default function App() {
         <Text>Open up App.tsx to start working on your app bae!</Text>
         <Btn label={"COUCOU BEBEW"} onClick={() => console.log("Je t'aime")} />
       </View> */}
+      {/* <SignIn /> */}
       {/* <PersonalInfo /> */}
       {/* <MeetingProfile /> */}
       {/* <ReadingProfile /> */}
       {/* <ReadingProfile2 /> */}
-      <Bookshelf />
-      {/* <Profile /> */}
+      {/* <Bookshelf /> */}
+      <Profile />
+      <Toast config={toastConfig} />
     </SafeAreaView>
   );
 }
