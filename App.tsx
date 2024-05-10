@@ -4,14 +4,18 @@ import Btn from "./src/components/Btn";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaView } from "react-native";
 import PersonalInfo from "./src/screens/PersonalInfo";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import MeetingProfile from "./src/screens/MeetingProfile";
-import ReadingProfile from "./src/screens/ReadingProfile";
-import ReadingProfile2 from "./src/screens/ReadingProfile2";
+import ReadingProfile from "./src/screens/ReadingProfile2";
+import ReadingProfile2 from "./src/screens/ReadingProfile1";
 import Profile from "./src/screens/Profile";
 import Bookshelf from "./src/screens/Bookshelf";
-import SignIn from "./src/screens/SignIn";
 import Toast, { BaseToast } from "react-native-toast-message";
+import { User, onAuthStateChanged } from "firebase/auth";
+import { FIREBASE_AUTH } from "./firebaseConfig";
+import { AuthProvider } from "./src/contexts/AuthContext";
+import Routes from "./src/routes/Routes";
+import { UserProvider } from "./src/contexts/UserContext";
 
 export default function App() {
   const CustomToast = ({ text1, text2 }: { text1: string; text2: string }) => (
@@ -33,21 +37,42 @@ export default function App() {
 
   const toastConfig = { error: (props: any) => <CustomToast {...props} /> };
 
+  // const AppLayout = () => {
+  //   return (
+  //     <AppStack.Navigator>
+  //       <AppStack.Screen
+  //         name="profile"
+  //         component={Profile}
+  //         options={{ headerShown: false }}
+  //       />
+  //     </AppStack.Navigator>
+  //   );
+  // };
+
+  // const [user, setUser] = useState<User | null>(null);
+
+  // useEffect(() => {
+  //   onAuthStateChanged(FIREBASE_AUTH, (user) => {
+  //     console.log("USER", user);
+  //     setUser(user);
+  //   });
+  // }, []);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar style="auto" />
-      {/* <View style={styles.container}>
+      <AuthProvider>
+        <UserProvider>
+          <StatusBar style="auto" />
+          {/* <View style={styles.container}>
         <Text>Open up App.tsx to start working on your app bae!</Text>
         <Btn label={"COUCOU BEBEW"} onClick={() => console.log("Je t'aime")} />
       </View> */}
-      {/* <SignIn /> */}
-      {/* <PersonalInfo /> */}
-      {/* <MeetingProfile /> */}
-      {/* <ReadingProfile /> */}
-      {/* <ReadingProfile2 /> */}
-      {/* <Bookshelf /> */}
-      <Profile />
-      <Toast config={toastConfig} />
+          <NavigationContainer>
+            <Routes />
+          </NavigationContainer>
+          <Toast config={toastConfig} />
+        </UserProvider>
+      </AuthProvider>
     </SafeAreaView>
   );
 }

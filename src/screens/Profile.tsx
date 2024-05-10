@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TextInput,
   Platform,
+  Button,
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import React, { useEffect, useState } from "react";
@@ -16,6 +17,12 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { showToast } from "../utils/Toasts";
+import { NavigationProp, RouteProp } from "@react-navigation/native";
+import { useAuth } from "../contexts/AuthContext";
+
+interface IRouterProps {
+  navigation: NavigationProp<any, any>;
+}
 
 const defaultUserInfo = {
   gender: "",
@@ -23,23 +30,19 @@ const defaultUserInfo = {
   city: "",
 };
 
-const MeetingProfile = () => {
+const Profile = ({ navigation }: IRouterProps) => {
   const [userInfo, setUserInfo] = useState(defaultUserInfo);
   const [isLitMatchEnabled, setIsLitMatchEnabled] = useState(false);
-
-  const onPressFunction = () => {
-    console.log("I was pressed");
-  };
+  const { setIsLoggedIn, setIsSignedUp } = useAuth();
 
   useEffect(() => {
     try {
       onAuthStateChanged(FIREBASE_AUTH, (user) => {
         if (user) {
-          console.log("LOGGED USER", user);
-
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/auth.user
           const uid = user.uid;
+          console.log("UUUUUUIIIIIDDDDD", uid);
           // ...
         } else {
           // User is signed out
@@ -54,10 +57,12 @@ const MeetingProfile = () => {
 
   const handleLogOut = async () => {
     try {
-      const reponse = await signOut(FIREBASE_AUTH);
-      console.log("LOG OUT RESPONSE", reponse);
+      FIREBASE_AUTH.signOut();
+      setIsLoggedIn(false);
+      setIsSignedUp(false);
+      console.log("LOGGED OUT SUCCESSFULLY");
     } catch (error: any) {
-      console.log(error.code);
+      console.log(error);
     }
   };
 
@@ -123,7 +128,7 @@ const MeetingProfile = () => {
   );
 };
 
-export default MeetingProfile;
+export default Profile;
 
 const styles = StyleSheet.create({
   pageLayout: {

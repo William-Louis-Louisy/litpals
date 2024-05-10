@@ -1,115 +1,295 @@
 import {
   View,
   Text,
-  Pressable,
-  Image,
   StyleSheet,
   TextInput,
   Platform,
+  FlatList,
+  Pressable,
+  Dimensions,
 } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import axios from "axios";
+import Config from "react-native-config";
+import debounce from "lodash.debounce";
 import Checkbox from "expo-checkbox";
-import React, { useState } from "react";
-import { Dropdown } from "react-native-element-dropdown";
-import { FontAwesome } from "@expo/vector-icons";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { FontAwesome6 } from "@expo/vector-icons";
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
+import { useUserContext } from "../contexts/UserContext";
 
 const defaultUserInfo = {
-  gender: "",
-  country: "",
-  city: "",
+  favoriteAuthors: [],
+  favoriteGenres: {
+    fiction: [],
+    nonFiction: [],
+  },
 };
 
-const ReadingProfile2 = () => {
+const ReadingProfile2 = ({ navigation }: any) => {
   const [userInfo, setUserInfo] = useState(defaultUserInfo);
+  const [authorsList, setAuthorsList] = useState([] as String[]);
+  const [authorQuery, setAuthorQuery] = useState("");
+  const [authorsDropdown, setAuthorsDropdown] = useState([]);
+  const [genresList, setGenresList] = useState([] as String[]);
+  //   const [genreQuery, setGenreQuery] = useState("");
+  //   const [genresDropdown, setGenresDropdown] = useState([]);
+  const [genreCategory, setGenreCategory] = useState("");
+  const genres = {
+    fiction: [
+      "Fantasy",
+      "Romantasy",
+      "Romance",
+      "Sci-Fi",
+      "Dystopia",
+      "Mystery",
+      "Thriller",
+      "Young Adult",
+      "New Adult",
+      "Graphic Novel",
+      "Manga",
+      "Historical Fiction",
+      "Action/Adventure",
+      "Children's book",
+      "Horror",
+      "True Crime",
+    ],
+    nonFiction: ["Self Help"],
+  };
+  const { dispatch } = useUserContext();
 
-  const onPressFunction = () => {
-    console.log("I was pressed");
+  const removeDuplicates = (arr: any) => {
+    const result = arr.reduce((acc: any, current: any) => {
+      const currentNameNormalized = current.name
+        .replace(/\./g, "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+      const existingIndex = acc.findIndex((item: any) => item.name);
+      if (existingIndex === -1) {
+        acc.push(current);
+      } else {
+        if (current.work_count > acc[existingIndex].work_count) {
+          acc[existingIndex] = current;
+        }
+      }
+      return acc;
+    }, []);
+    return result;
+  };
+
+  const getAuthors = async () => {
+    try {
+      const response = await axios.get(
+        `https://openlibrary.org/search/authors.json?q=${authorQuery}&limit=5`
+      );
+
+      const authorsFound = removeDuplicates(response.data.docs).map(
+        (author: any) => author.name
+      );
+
+      setAuthorsDropdown(authorsFound);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleAuthorChange = useCallback(debounce(getAuthors, 300), [
+    authorQuery,
+  ]);
+
+  const handleSelectAuthor = (author: any) => {
+    setAuthorsList([...authorsList, author]);
+    setAuthorQuery("");
+  };
+
+  useEffect(() => {
+    handleAuthorChange();
+    return () => handleAuthorChange.cancel();
+  }, [authorQuery, handleAuthorChange]);
+
+  const toggleGenresDrowdown = (category: string) => {
+    if (genreCategory !== category) setGenreCategory(category);
+    else setGenreCategory("");
+  };
+
+  const handleSelectGenre = (genre: any) => {
+    if (!genresList.includes(genre)) setGenresList([...genresList, genre]);
+    else
+      setGenresList(
+        genresList.filter((existingGenre) => existingGenre !== genre)
+      );
+  };
+
+  const handleClick = async () => {
+    try {
+      dispatch({
+        type: "UPDATE_FIELD",
+        payload: {
+          field: "readingInfo2",
+          value: {
+            favoriteAuthors: authorsList,
+            favoriteGenres: {
+              fiction: genresList,
+              nonFiction: [],
+            },
+          },
+        },
+      });
+      navigateToNext();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const navigateToPrev = () => {
+    navigation.goBack();
+  };
+
+  const navigateToNext = () => {
+    navigation.navigate("ReadingProfile2");
   };
 
   return (
     <View style={styles.pageLayout}>
       <View style={styles.progressHeader}>
-        <Pressable>
+        <Pressable onPress={navigateToPrev}>
           <FontAwesome6 name="chevron-left" size={24} color="black" />
         </Pressable>
-        <Pressable style={styles.btnOutlineDiscreet}>
+        <Pressable onPress={navigateToNext} style={styles.btnOutlineDiscreet}>
           <Text style={styles.btnOutlineDiscreetText}>Skip</Text>
         </Pressable>
       </View>
 
-      <View>
-        <Text style={styles.label}>FORMAT</Text>
-        <View style={styles.flexContainer}>
-          <Pressable style={styles.textIconBtn}>
-            <Ionicons name="book" size={24} color="black" />
-            <Text>Paperback</Text>
-          </Pressable>
-          <Pressable style={styles.textIconBtn}>
-            <FontAwesome5 name="tablet-alt" size={24} color="black" />
-            <Text>E-Book</Text>
-          </Pressable>
-          <Pressable style={styles.textIconBtn}>
-            <FontAwesome6 name="book-bookmark" size={24} color="black" />
-            <Text>Hardcover</Text>
-          </Pressable>
-          <Pressable style={styles.textIconBtn}>
-            <FontAwesome name="book" size={24} color="black" />
-            <Text>Pocket book</Text>
-          </Pressable>
-          <Pressable style={styles.textIconBtn}>
-            <FontAwesome6 name="headphones" size={24} color="black" />
-            <Text>Audio book</Text>
-          </Pressable>
+      <View style={styles.pageContent}>
+        <View>
+          <Text style={styles.label}>FAVORITE AUTHORS</Text>
+          <TextInput
+            style={styles.input}
+            value={authorQuery}
+            placeholder={"Search for an author"}
+            onChangeText={setAuthorQuery}
+          />
+          {authorQuery.length > 0 && (
+            <FlatList
+              contentContainerStyle={styles.dropdownContainer}
+              data={authorsDropdown}
+              renderItem={({ item }) => (
+                <Text
+                  style={styles.dropdownItem}
+                  onPress={() => handleSelectAuthor(item)}
+                >
+                  {item}
+                </Text>
+              )}
+              keyExtractor={(item) => item}
+            />
+          )}
+          {authorsList.length > 0 && (
+            <FlatList
+              style={{ maxHeight: Dimensions.get("window").height / 4 }}
+              contentContainerStyle={styles.chosenItemsContainer}
+              data={authorsList}
+              renderItem={({ item }) => (
+                <View style={styles.chosenItem}>
+                  <Text style={styles.textMd}>{item}</Text>
+                  <FontAwesome
+                    onPress={() =>
+                      setAuthorsList(
+                        authorsList.filter((author) => author != item)
+                      )
+                    }
+                    name="times-circle"
+                    size={24}
+                    color="black"
+                  />
+                </View>
+              )}
+              keyExtractor={(item) => `${item}-selected`}
+            />
+          )}
         </View>
 
-        <Text style={styles.label}>READING LANGUAGES</Text>
-        <View style={styles.flexContainer}>
-            <Pressable style={styles.textIconBtn}>
-            <FontAwesome name="book" size={24} color="black" />
-            <Text>French</Text>
+        <View>
+          <Text style={styles.label}>FAVORITE GENRES</Text>
+          <View>
+            <Pressable
+              style={styles.textIcon}
+              onPress={() => toggleGenresDrowdown("fiction")}
+            >
+              <Text style={styles.textMd}>Fiction</Text>
+              <FontAwesome6
+                name={
+                  genreCategory === "fiction" ? "chevron-up" : "chevron-down"
+                }
+                size={24}
+                color="black"
+              />
             </Pressable>
-            <Pressable style={styles.textIconBtn}>
-            <FontAwesome6 name="headphones" size={24} color="black" />
-            <Text>English</Text>
+            {genreCategory === "fiction" && (
+              <FlatList
+                horizontal={false}
+                numColumns={2}
+                contentContainerStyle={styles.dropdownContainer}
+                data={genres.fiction}
+                renderItem={({ item }) => (
+                  <Pressable
+                    style={styles.genreItem}
+                    onPress={() => handleSelectGenre(item)}
+                  >
+                    <Checkbox
+                      style={styles.checkbox}
+                      value={genresList.includes(item)}
+                      color={"orange"}
+                    />
+                    <Text style={styles.textMd}>{item}</Text>
+                  </Pressable>
+                )}
+                keyExtractor={(item) => item}
+              />
+            )}
+          </View>
+          <View>
+            <Pressable
+              style={styles.textIcon}
+              onPress={() => toggleGenresDrowdown("non-fiction")}
+            >
+              <Text>Non-Fiction</Text>
+              <FontAwesome6
+                name={
+                  genreCategory === "non-fiction"
+                    ? "chevron-up"
+                    : "chevron-down"
+                }
+                size={24}
+                color="black"
+              />
             </Pressable>
-            <Pressable style={styles.textIconBtn}>
-            <FontAwesome6 name="headphones" size={24} color="black" />
-            <Text>Both</Text>
-            </Pressable>
+            {genreCategory === "non-fiction" && (
+              <FlatList
+                horizontal={false}
+                numColumns={2}
+                contentContainerStyle={styles.dropdownContainer}
+                data={genres.nonFiction}
+                renderItem={({ item }) => (
+                  <Pressable
+                    style={styles.genreItem}
+                    onPress={() => handleSelectGenre(item)}
+                  >
+                    <Checkbox
+                      style={styles.checkbox}
+                      value={genresList.includes(item)}
+                      color={"orange"}
+                    />
+                    <Text style={styles.textMd}>{item}</Text>
+                  </Pressable>
+                )}
+                keyExtractor={(item) => item}
+              />
+            )}
+          </View>
         </View>
-
-        <Text style={styles.label}>CITY</Text>
-        <View style={styles.flexContainer}>
-            <Pressable style={styles.textIconBtn}>
-            <Ionicons name="library" size={24} color="black" />
-            <Text>Sagas</Text>
-            </Pressable>
-            <Pressable style={styles.textIconBtn}>
-            <FontAwesome6 name="book" size={24} color="black" />
-            <Text>Standalone</Text>
-            </Pressable>
-            <Pressable style={styles.textIconBtn}>
-            <FontAwesome6 name="grin-hearts" size={24} color="black" />
-            <Text>Both</Text>
-            </Pressable>
-        </View>
-        
-
-
-        {/* <Dropdown
-            data={accountTypes}
-            labelField="label"
-            valueField="value"
-            placeholder="Choose your account type:"
-            onChange={(e) => setAccountType(e.value)}
-            style={[styles.input, styles.mb15]}
-            value={accountType}
-          /> */}
       </View>
 
-      <Pressable onPress={onPressFunction} style={styles.btnPrimary}>
+      <Pressable onPress={handleClick} style={styles.btnPrimary}>
         <Text style={styles.btnText}>Next</Text>
       </Pressable>
     </View>
@@ -119,12 +299,61 @@ const ReadingProfile2 = () => {
 export default ReadingProfile2;
 
 const styles = StyleSheet.create({
+  chosenItemsContainer: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 10,
+    flexWrap: "wrap",
+    overflow: "scroll",
+  },
+  chosenItem: {
+    backgroundColor: "lightgray",
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 25,
+    gap: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+  },
+  dropdownContainer: {
+    backgroundColor: "lightgray",
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+  },
+  dropdownItem: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 18,
+  },
+  genreItem: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    width: "50%",
+    flexDirection: "row",
+    gap: 5,
+    alignItems: "center",
+  },
+  checkbox: {
+    width: 15,
+    height: 15,
+    borderRadius: 100,
+  },
+  textMd: {
+    fontSize: 18,
+  },
+  textIcon: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  pageContent: {
+    gap: 20,
+  },
   pageLayout: {
     paddingHorizontal: 20,
     paddingVertical: 30,
-    display: "flex",
-    justifyContent: "space-between",
     height: "100%",
+    justifyContent: "space-between",
     flex: 1,
   },
   progressHeader: {

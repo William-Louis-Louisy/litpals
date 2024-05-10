@@ -6,6 +6,7 @@ import {
   TextInput,
   Platform,
   Dimensions,
+  KeyboardAvoidingView,
 } from "react-native";
 import React, { useState } from "react";
 import {
@@ -14,11 +15,13 @@ import {
 } from "firebase/auth";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { showToast } from "../utils/Toasts";
+import { useAuth } from "../contexts/AuthContext";
 
 const SignIn = () => {
   const [userMail, setUserMail] = useState("");
   const [userPwd, setUserPwd] = useState("");
   const auth = FIREBASE_AUTH;
+  const { setIsLoggedIn, setIsSignedUp } = useAuth();
 
   const handleLogIn = async () => {
     try {
@@ -27,7 +30,7 @@ const SignIn = () => {
         userMail,
         userPwd
       );
-      console.log(userCredential.user);
+      if (userCredential) setIsLoggedIn(true);
     } catch (error: any) {
       if (error.code === "auth/invalid-credential")
         showToast({
@@ -45,7 +48,7 @@ const SignIn = () => {
         userMail,
         userPwd
       );
-      console.log("userCredential", userCredential.user);
+      if (userCredential) setIsSignedUp(true);
     } catch (error: any) {
       if (error.code === "auth/email-already-in-use")
         showToast({
@@ -58,46 +61,48 @@ const SignIn = () => {
 
   return (
     <View style={styles.pageLayout}>
-      <View>
+      <KeyboardAvoidingView behavior="padding">
         <View>
-          <Text style={styles.label}>EMAIL</Text>
-          <TextInput
-            style={styles.input}
-            value={userMail}
-            inputMode="email"
-            placeholder={"john.doe@mail.com"}
-            placeholderTextColor={"orange"}
-            onChangeText={setUserMail}
-            autoCapitalize="none"
-            autoComplete="off"
-            autoCorrect={false}
-          />
+          <View>
+            <Text style={styles.label}>EMAIL</Text>
+            <TextInput
+              style={styles.input}
+              value={userMail}
+              inputMode="email"
+              placeholder={"john.doe@mail.com"}
+              placeholderTextColor={"orange"}
+              onChangeText={setUserMail}
+              autoCapitalize="none"
+              autoComplete="off"
+              autoCorrect={false}
+            />
+          </View>
+          <View>
+            <Text style={styles.label}>PASSWORD</Text>
+            <TextInput
+              style={styles.input}
+              value={userPwd}
+              inputMode="text"
+              placeholder={"password"}
+              placeholderTextColor={"orange"}
+              secureTextEntry={true}
+              onChangeText={setUserPwd}
+              textContentType="newPassword"
+              autoCapitalize="none"
+            />
+          </View>
         </View>
-        <View>
-          <Text style={styles.label}>PASSWORD</Text>
-          <TextInput
-            style={styles.input}
-            value={userPwd}
-            inputMode="text"
-            placeholder={"password"}
-            placeholderTextColor={"orange"}
-            secureTextEntry={true}
-            onChangeText={setUserPwd}
-            textContentType="newPassword"
-            autoCapitalize="none"
-          />
+
+        <View style={{ gap: 20 }}>
+          <Pressable style={styles.btnPrimary} onPress={handleLogIn}>
+            <Text style={styles.btnText}>Log in</Text>
+          </Pressable>
+
+          <Pressable style={styles.btnPrimaryOutline} onPress={handleSignIn}>
+            <Text style={[styles.btnText, styles.colorTeal]}>Sign in</Text>
+          </Pressable>
         </View>
-      </View>
-
-      <View style={{ gap: 20 }}>
-        <Pressable style={styles.btnPrimary} onPress={handleLogIn}>
-          <Text style={styles.btnText}>Log in</Text>
-        </Pressable>
-
-        <Pressable style={styles.btnPrimaryOutline} onPress={handleSignIn}>
-          <Text style={[styles.btnText, styles.colorTeal]}>Sign in</Text>
-        </Pressable>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };

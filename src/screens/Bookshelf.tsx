@@ -8,22 +8,21 @@ import {
   Platform,
   Dimensions,
   FlatList,
-  ScrollView,
 } from "react-native";
-import Checkbox from "expo-checkbox";
 import React, { useCallback, useEffect, useState } from "react";
-import { Dropdown } from "react-native-element-dropdown";
-import { FontAwesome } from "@expo/vector-icons";
-import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 import debounce from "lodash.debounce";
 import axios from "axios";
 import Config from "react-native-config";
+import { useAuth } from "../contexts/AuthContext";
+import { useUserContext } from "../contexts/UserContext";
 
-const Bookshelf = () => {
+const Bookshelf = ({ navigation }: any) => {
   const [bookQuery, setBookQuery] = useState("");
   const [booksDrowpdown, setBooksDropdown] = useState([] as any);
   const [bookshelf, setBookshelf] = useState([] as any[]);
+  const { setIsLoggedIn, setIsSignedUp } = useAuth();
+  const { state, dispatch } = useUserContext();
 
   const getBooks = async () => {
     try {
@@ -53,7 +52,7 @@ const Bookshelf = () => {
   const handleBookChange = useCallback(debounce(getBooks, 300), [bookQuery]);
 
   useEffect(() => {
-    handleBookChange();
+    if (bookQuery.length > 2) handleBookChange();
     return () => handleBookChange.cancel();
   }, [bookQuery, handleBookChange]);
 
@@ -62,15 +61,40 @@ const Bookshelf = () => {
     setBookQuery("");
   };
 
+  const handleClick = async () => {
+    try {
+      dispatch({
+        type: "UPDATE_FIELD",
+        payload: {
+          field: "bookshelf",
+          value: bookshelf.map((book) => book.id),
+        },
+      });
+      console.log("STATE", state);
+      navigateToApp();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const navigateToPrev = () => {
+    navigation.goBack();
+  };
+
+  const navigateToApp = () => {
+    setIsSignedUp(false);
+    setIsLoggedIn(true);
+  };
+
   return (
     <View style={styles.pageLayout}>
       <View style={styles.progressHeader}>
-        <Pressable>
+        <Pressable onPress={navigateToPrev}>
           <FontAwesome6 name="chevron-left" size={24} color="black" />
         </Pressable>
-        <Pressable style={styles.btnOutlineDiscreet}>
+        {/* <Pressable style={styles.btnOutlineDiscreet}>
           <Text style={styles.btnOutlineDiscreetText}>Skip</Text>
-        </Pressable>
+        </Pressable> */}
       </View>
 
       <View>
@@ -125,8 +149,8 @@ const Bookshelf = () => {
         </View>
       </View>
 
-      <Pressable style={styles.btnPrimary}>
-        <Text style={styles.btnText}>Next</Text>
+      <Pressable onPress={handleClick} style={styles.btnPrimary}>
+        <Text style={styles.btnText}>Done</Text>
       </Pressable>
     </View>
   );

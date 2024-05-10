@@ -4,49 +4,44 @@ import {
   Pressable,
   Image,
   StyleSheet,
-  TextInput,
   Platform,
 } from "react-native";
-import Checkbox from "expo-checkbox";
 import React, { useState } from "react";
-import { Dropdown } from "react-native-element-dropdown";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useUserContext } from "../contexts/UserContext";
 
 const defaultUserInfo = {
-  gender: "",
-  country: "",
-  city: "",
-  litMatchPreferences: {
-    relationshipType: "",
-    communicationType: "",
-    genderPreference: "",
-  },
+  bookTypes: [] as string[],
+  readingLanguages: "",
+  format: "",
 };
 
-const MeetingProfile = ({ navigation }: any) => {
+const ReadingProfile1 = ({ navigation }: any) => {
   const [userInfo, setUserInfo] = useState(defaultUserInfo);
-  const [relationshipType, setRelationshipType] = useState("");
-  const [communicationType, setCommunicationType] = useState("");
-  const [genderPreference, setGenderPreference] = useState("");
   const { dispatch } = useUserContext();
+
+  const handleSelectBookType = (type: string) => {
+    if (!userInfo.bookTypes.includes(type))
+      setUserInfo({ ...userInfo, bookTypes: [...userInfo.bookTypes, type] });
+    else
+      setUserInfo({
+        ...userInfo,
+        bookTypes: userInfo.bookTypes.filter(
+          (existingGenre) => existingGenre !== type
+        ),
+      });
+  };
 
   const handleClick = async () => {
     try {
       dispatch({
         type: "UPDATE_FIELD",
         payload: {
-          field: "meetingInfo",
-          value: {
-            ...userInfo,
-            litMatchPreferences: {
-              relationshipType,
-              communicationType,
-              genderPreference,
-            },
-          },
+          field: "readingInfo1",
+          value: userInfo,
         },
       });
       navigateToNext();
@@ -60,7 +55,7 @@ const MeetingProfile = ({ navigation }: any) => {
   };
 
   const navigateToNext = () => {
-    navigation.navigate("ReadingProfile");
+    navigation.navigate("Bookshelf");
   };
 
   return (
@@ -75,159 +70,146 @@ const MeetingProfile = ({ navigation }: any) => {
       </View>
 
       <View>
-        <Text style={styles.label}>GENDER</Text>
+        <Text style={styles.label}>BOOK TYPE</Text>
         <View style={styles.flexContainer}>
           <Pressable
             style={[
               styles.textIconBtn,
-              userInfo.gender === "woman" && styles.pressableSelected,
+              userInfo.bookTypes.includes("paperback") &&
+                styles.pressableSelected,
             ]}
-            onPress={() => setUserInfo({ ...userInfo, gender: "woman" })}
+            onPress={() => handleSelectBookType("paperback")}
           >
-            <FontAwesome6 name="venus" size={24} color="black" />
-            <Text>Woman</Text>
+            <Ionicons name="book" size={24} color="black" />
+            <Text>Paperback</Text>
           </Pressable>
-
           <Pressable
             style={[
               styles.textIconBtn,
-              userInfo.gender === "man" && styles.pressableSelected,
+              userInfo.bookTypes.includes("e-book") && styles.pressableSelected,
             ]}
-            onPress={() => setUserInfo({ ...userInfo, gender: "man" })}
+            onPress={() => handleSelectBookType("e-book")}
           >
-            <FontAwesome6 name="mars" size={24} color="black" />
-            <Text>Man</Text>
+            <FontAwesome5 name="tablet-alt" size={24} color="black" />
+            <Text>E-Book</Text>
           </Pressable>
-
           <Pressable
             style={[
               styles.textIconBtn,
-              userInfo.gender === "other" && styles.pressableSelected,
+              userInfo.bookTypes.includes("hardcover") &&
+                styles.pressableSelected,
             ]}
-            onPress={() => setUserInfo({ ...userInfo, gender: "other" })}
+            onPress={() => handleSelectBookType("hardcover")}
           >
-            <FontAwesome6 name="ellipsis" size={24} color="black" />
-            <Text>Other</Text>
+            <FontAwesome6 name="book-bookmark" size={24} color="black" />
+            <Text>Hardcover</Text>
+          </Pressable>
+          <Pressable
+            style={[
+              styles.textIconBtn,
+              userInfo.bookTypes.includes("pocket-book") &&
+                styles.pressableSelected,
+            ]}
+            onPress={() => handleSelectBookType("pocket-book")}
+          >
+            <FontAwesome name="book" size={24} color="black" />
+            <Text>Pocket book</Text>
+          </Pressable>
+          <Pressable
+            style={[
+              styles.textIconBtn,
+              userInfo.bookTypes.includes("audio-book") &&
+                styles.pressableSelected,
+            ]}
+            onPress={() => handleSelectBookType("audio-book")}
+          >
+            <FontAwesome6 name="headphones" size={24} color="black" />
+            <Text>Audio book</Text>
           </Pressable>
         </View>
 
-        <Text style={styles.label}>COUNTRY</Text>
-        <TextInput
-          style={[styles.input, styles.mb15]}
-          value={userInfo.country}
-          placeholder={"Country"}
-          onChangeText={(e) => setUserInfo({ ...userInfo, country: e })}
-        />
-
-        <Text style={styles.label}>CITY</Text>
-        <TextInput
-          style={[styles.input, styles.mb15]}
-          value={userInfo.city}
-          placeholder={"City"}
-          onChangeText={(e) => setUserInfo({ ...userInfo, city: e })}
-        />
-
-        <Text style={styles.label}>LOOKING FOR</Text>
-        {/* RELATIONSHIP TYPE */}
+        <Text style={styles.label}>READING LANGUAGES</Text>
         <View style={styles.flexContainer}>
           <Pressable
             style={[
               styles.textIconBtn,
-              relationshipType === "love" && styles.pressableSelected,
+              userInfo.readingLanguages === "french" &&
+                styles.pressableSelected,
             ]}
-            onPress={() => setRelationshipType("love")}
+            onPress={() =>
+              setUserInfo({ ...userInfo, readingLanguages: "french" })
+            }
           >
-            <FontAwesome name="heart" size={24} color="black" />
-            <Text>Love</Text>
+            <Image
+              style={styles.flag}
+              source={require("../../assets/flags/france.png")}
+            />
+            <Text>French</Text>
           </Pressable>
           <Pressable
             style={[
               styles.textIconBtn,
-              relationshipType === "friendship" && styles.pressableSelected,
+              userInfo.readingLanguages === "english" &&
+                styles.pressableSelected,
             ]}
-            onPress={() => setRelationshipType("friendship")}
+            onPress={() =>
+              setUserInfo({ ...userInfo, readingLanguages: "english" })
+            }
           >
-            <FontAwesome6 name="handshake-angle" size={24} color="black" />
-            <Text>Friendship</Text>
+            <Image
+              style={styles.flag}
+              source={require("../../assets/flags/uk.png")}
+            />
+            <Text>English</Text>
           </Pressable>
           <Pressable
             style={[
               styles.textIconBtn,
-              relationshipType === "both" && styles.pressableSelected,
+              userInfo.readingLanguages === "both" && styles.pressableSelected,
             ]}
-            onPress={() => setRelationshipType("both")}
+            onPress={() =>
+              setUserInfo({ ...userInfo, readingLanguages: "both" })
+            }
           >
-            <FontAwesome6 name="grin-stars" size={24} color="black" />
+            <Image
+              style={styles.flag}
+              source={require("../../assets/flags/uk-fr.png")}
+            />
             <Text>Both</Text>
           </Pressable>
         </View>
 
-        {/* COMMUNICATION TYPE */}
+        <Text style={styles.label}>FORMAT</Text>
         <View style={styles.flexContainer}>
           <Pressable
             style={[
               styles.textIconBtn,
-              communicationType === "online" && styles.pressableSelected,
+              userInfo.format === "series" && styles.pressableSelected,
             ]}
-            onPress={() => setCommunicationType("online")}
+            onPress={() => setUserInfo({ ...userInfo, format: "series" })}
           >
-            <FontAwesome name="laptop" size={24} color="black" />
-            <Text>Online</Text>
+            <Ionicons name="library" size={24} color="black" />
+            <Text>Series</Text>
           </Pressable>
           <Pressable
             style={[
               styles.textIconBtn,
-              communicationType === "irl" && styles.pressableSelected,
+              userInfo.format === "standalone" && styles.pressableSelected,
             ]}
-            onPress={() => setCommunicationType("irl")}
+            onPress={() => setUserInfo({ ...userInfo, format: "standalone" })}
           >
-            <FontAwesome5 name="glass-cheers" size={24} color="black" />
-            <Text>IRL</Text>
+            <FontAwesome6 name="book" size={24} color="black" />
+            <Text>Standalone</Text>
           </Pressable>
           <Pressable
             style={[
               styles.textIconBtn,
-              communicationType === "both" && styles.pressableSelected,
+              userInfo.format === "both" && styles.pressableSelected,
             ]}
-            onPress={() => setCommunicationType("both")}
+            onPress={() => setUserInfo({ ...userInfo, format: "both" })}
           >
-            <FontAwesome name="comments" size={24} color="black" />
+            <FontAwesome6 name="grin-hearts" size={24} color="black" />
             <Text>Both</Text>
-          </Pressable>
-        </View>
-
-        {/* GENDER PREFERENCES */}
-        <View style={styles.flexContainer}>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              genderPreference === "woman" && styles.pressableSelected,
-            ]}
-            onPress={() => setGenderPreference("woman")}
-          >
-            <FontAwesome6 name="venus" size={24} color="black" />
-            <Text>Woman</Text>
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              genderPreference === "man" && styles.pressableSelected,
-            ]}
-            onPress={() => setGenderPreference("man")}
-          >
-            <FontAwesome6 name="mars" size={24} color="black" />
-            <Text>Man</Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              genderPreference === "any-gender" && styles.pressableSelected,
-            ]}
-            onPress={() => setGenderPreference("any-gender")}
-          >
-            <FontAwesome6 name="venus-mars" size={24} color="black" />
-            <Text>Any gender</Text>
           </Pressable>
         </View>
       </View>
@@ -239,13 +221,17 @@ const MeetingProfile = ({ navigation }: any) => {
   );
 };
 
-export default MeetingProfile;
+export default ReadingProfile1;
 
 const styles = StyleSheet.create({
   pressableSelected: {
     borderWidth: 2,
     borderColor: "orange",
     backgroundColor: "rgba(255, 222, 173, .5)",
+  },
+  flag: {
+    width: 30,
+    height: 20,
   },
   pageLayout: {
     paddingHorizontal: 20,
@@ -275,6 +261,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     gap: 10,
+    flexWrap: "wrap",
   },
   textIconBtn: {
     borderWidth: 1,
@@ -286,6 +273,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     gap: 5,
     flex: 1,
+    minWidth: "30%",
   },
   label: {
     marginBottom: 5,
