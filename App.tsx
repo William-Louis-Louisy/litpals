@@ -16,6 +16,7 @@ import { FIREBASE_AUTH } from "./firebaseConfig";
 import { AuthProvider } from "./src/contexts/AuthContext";
 import Routes from "./src/routes/Routes";
 import { UserProvider } from "./src/contexts/UserContext";
+import "react-native-reanimated";
 
 export default function App() {
   const CustomToast = ({ text1, text2 }: { text1: string; text2: string }) => (
