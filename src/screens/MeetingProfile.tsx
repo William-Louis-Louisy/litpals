@@ -8,12 +8,13 @@ import {
   Platform,
 } from "react-native";
 import Checkbox from "expo-checkbox";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-native-element-dropdown";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { useUserContext } from "../contexts/UserContext";
+import axios from "axios";
 
 const defaultUserInfo = {
   gender: "",
@@ -31,6 +32,7 @@ const MeetingProfile = ({ navigation }: any) => {
   const [relationshipType, setRelationshipType] = useState("");
   const [communicationType, setCommunicationType] = useState("");
   const [genderPreference, setGenderPreference] = useState("");
+  const [countryQuery, setCountryQuery] = useState("");
   const { dispatch } = useUserContext();
 
   const handleClick = async () => {
@@ -60,8 +62,27 @@ const MeetingProfile = ({ navigation }: any) => {
   };
 
   const navigateToNext = () => {
-    navigation.navigate("ReadingProfile");
+    navigation.navigate("ReadingProfile1");
   };
+
+  // useEffect(() => {
+  //   if (countryQuery.length >= 2) {
+  //     getCountryList();
+  //   }
+  // }, [countryQuery]);
+
+  // const getCountryList = async () => {
+  //   try {
+  //     const response: any = await axios.get(
+  //       `https://restcountries.com/v3.1/name/${countryQuery}`
+  //     );
+  //     console.log("RESPONSE", response);
+
+  //     // setAuthorsDropdown(authorsFound);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   return (
     <View style={styles.pageLayout}>
@@ -114,9 +135,10 @@ const MeetingProfile = ({ navigation }: any) => {
         <Text style={styles.label}>COUNTRY</Text>
         <TextInput
           style={[styles.input, styles.mb15]}
-          value={userInfo.country}
+          value={countryQuery}
           placeholder={"Country"}
-          onChangeText={(e) => setUserInfo({ ...userInfo, country: e })}
+          onChangeText={setCountryQuery}
+          // onChangeText={(e) => setUserInfo({ ...userInfo, country: e })}
         />
 
         <Text style={styles.label}>CITY</Text>

@@ -121,27 +121,20 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
   const submitUserData = async () => {
     try {
       const userData = state;
-      console.log("userrr", userData);
-
       const data = await axios.post(`http://192.168.0.49:5000/users`, userData);
-      if (data) console.log("DATAAAA");
-      if (data.data) {
-        console.log(data.data);
-      }
 
       // Set dataSubmitted to true after successful submission
       //   setDataSubmitted(true);
 
-      //   dispatch({ type: "RESET" });
+      dispatch({ type: "RESET" });
     } catch (error) {
       console.error("Error submitting user data:", error);
     }
   };
 
-  //   useEffect(() => {
-  //     console.log("state", state);
-  //     submitUserData();
-  //   }, [state.bookshelf]);
+  useEffect(() => {
+    if (state.personalInfo.username) submitUserData();
+  }, [state.bookshelf]);
 
   return (
     <UserContext.Provider value={{ state, dispatch, submitUserData }}>

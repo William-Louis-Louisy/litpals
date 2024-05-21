@@ -7,6 +7,7 @@ import {
   FlatList,
   Pressable,
   Dimensions,
+  ScrollView,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
@@ -36,7 +37,6 @@ const ReadingProfile2 = ({ navigation }: any) => {
   const genres = {
     fiction: [
       "Fantasy",
-      "Romantasy",
       "Romance",
       "Sci-Fi",
       "Dystopia",
@@ -45,14 +45,32 @@ const ReadingProfile2 = ({ navigation }: any) => {
       "Young Adult",
       "New Adult",
       "Graphic Novel",
-      "Manga",
+      "Manga/Comics",
       "Historical Fiction",
       "Action/Adventure",
       "Children's book",
       "Horror",
-      "True Crime",
+      "Contemporary Fiction",
+      "Other",
     ],
-    nonFiction: ["Self Help"],
+    nonFiction: [
+      "Self Help",
+      "Memoir/Biography",
+      "Food/Drink",
+      "Art/Photography",
+      "History",
+      "Travel",
+      "True Crime",
+      "DIY/Crafts",
+      "Education/Learning",
+      "Home/Garden",
+      "Religion/Sprituality",
+      "Health/Wellness",
+      "Science/Technology",
+      "Business/Economy",
+      "Humor/Entertainment",
+      "Other",
+    ],
   };
   const { dispatch } = useUserContext();
 
@@ -145,7 +163,7 @@ const ReadingProfile2 = ({ navigation }: any) => {
   };
 
   const navigateToNext = () => {
-    navigation.navigate("ReadingProfile2");
+    navigation.navigate("Bookshelf");
   };
 
   return (
@@ -169,24 +187,27 @@ const ReadingProfile2 = ({ navigation }: any) => {
             onChangeText={setAuthorQuery}
           />
           {authorQuery.length > 0 && (
-            <FlatList
+            <ScrollView
+              keyboardShouldPersistTaps={"always"}
+              // style={styles.booksDropdownStyle}
               contentContainerStyle={styles.dropdownContainer}
-              data={authorsDropdown}
-              renderItem={({ item }) => (
-                <Text
-                  style={styles.dropdownItem}
-                  onPress={() => handleSelectAuthor(item)}
-                >
-                  {item}
-                </Text>
-              )}
-              keyExtractor={(item) => item}
-            />
+            >
+              {authorsDropdown.map((author: any) => {
+                return (
+                  <Text
+                    style={styles.dropdownItem}
+                    onPress={() => handleSelectAuthor(author)}
+                  >
+                    {author}
+                  </Text>
+                );
+              })}
+            </ScrollView>
           )}
           {authorsList.length > 0 && (
             <FlatList
-              style={{ maxHeight: Dimensions.get("window").height / 4 }}
               contentContainerStyle={styles.chosenItemsContainer}
+              style={{ maxHeight: 114 }}
               data={authorsList}
               renderItem={({ item }) => (
                 <View style={styles.chosenItem}>
@@ -305,6 +326,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     flexWrap: "wrap",
     overflow: "scroll",
+    paddingBottom: 10,
   },
   chosenItem: {
     backgroundColor: "lightgray",

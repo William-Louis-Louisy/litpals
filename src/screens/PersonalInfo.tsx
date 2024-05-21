@@ -6,14 +6,16 @@ import {
   StyleSheet,
   TextInput,
   Platform,
+  Keyboard,
 } from "react-native";
 import Checkbox from "expo-checkbox";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Dropdown } from "react-native-element-dropdown";
 import DatePicker from "react-native-date-picker";
 import axios from "axios";
 import Config from "react-native-config";
 import { useUserContext } from "../contexts/UserContext";
+import { showToast } from "../utils/Toasts";
 
 const defaultUserInfo = {
   username: "",
@@ -27,12 +29,23 @@ const defaultUserInfo = {
   litMatchEnabled: false,
 };
 
+interface UserInfo {
+  birthdate: {
+    day: string;
+    month: string;
+    year: string;
+  };
+}
+
 const PersonalInfo = ({ navigation }: any) => {
   const [userInfo, setUserInfo] = useState(defaultUserInfo);
   const [isBirthdatePrivate, setIsBirthdatePrivate] = useState(false);
   const [isLitMatchEnabled, setIsLitMatchEnabled] = useState(false);
   const [accountType, setAccountType] = useState("reader");
-  const { state, dispatch } = useUserContext();
+  const { dispatch } = useUserContext();
+  const dayRef = useRef(null);
+  const monthRef = useRef(null);
+  const yearRef = useRef(null);
   const accountTypes = [
     { label: "Reader", value: "reader" },
     { label: "Author", value: "author" },
@@ -61,7 +74,65 @@ const PersonalInfo = ({ navigation }: any) => {
   };
 
   const navigateToNext = () => {
-    navigation.navigate("MeetingProfile");
+    if (isLitMatchEnabled) navigation.navigate("MeetingProfile");
+    else navigation.navigate("ReadingProfile1");
+  };
+
+  const validateUsername = async () => {
+    if (userInfo.username.length < 1) {
+      showToast({
+        type: "error",
+        headline: "Please choose a username",
+        message: "This is a required field, please enter a value.",
+      });
+    }
+    try {
+      const usernameAlreadyExists = await axios.get(
+        "http://192.168.0.49:5000/check-username",
+        { params: { username: userInfo.username } }
+      );
+      if (!usernameAlreadyExists.data.isAvailable) {
+        showToast({
+          type: "error",
+          headline: "This username is already taken",
+          message: "Please choose another one.",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleBackspace = (e: any, value: keyof UserInfo["birthdate"]) => {
+    if (!userInfo.birthdate[value] && e.nativeEvent.key === "Backspace") {
+      if (value === "month") dayRef.current.focus();
+      else if (value === "year") monthRef.current.focus();
+    }
+  };
+
+  const handleBirthdateChange = (e: any, value: string) => {
+    if ((value === "day" || value === "month") && e.length === 2) {
+      if (value === "day") monthRef.current.focus();
+      else if (value === "month") yearRef.current.focus();
+    } else if (value === "year" && e.length === 4) Keyboard.dismiss();
+  };
+
+  const validateBirthdate = () => {
+    const year = Number(userInfo.birthdate.year);
+    const month = Number(userInfo.birthdate.month) - 1;
+    const day = Number(userInfo.birthdate.day);
+    const date: Date = new Date(Date.UTC(year, month, day));
+    if (
+      date.getUTCFullYear() !== year ||
+      date.getUTCMonth() !== month ||
+      date.getUTCDate() !== day
+    ) {
+      showToast({
+        type: "error",
+        headline: "This date doesn't seem right",
+        message: "Please verify your birthdate.",
+      });
+    }
   };
 
   return (
@@ -81,6 +152,7 @@ const PersonalInfo = ({ navigation }: any) => {
           value={userInfo.username}
           placeholder={"Username"}
           onChangeText={(e) => setUserInfo({ ...userInfo, username: e })}
+          onBlur={validateUsername}
           // autoCapitalize="none"
           autoComplete="off"
           autoCorrect={false}
@@ -90,42 +162,56 @@ const PersonalInfo = ({ navigation }: any) => {
             <Text style={styles.label}>BIRTHDATE</Text>
             <View style={{ flexDirection: "row" }}>
               <TextInput
+                ref={dayRef}
                 style={styles.input}
                 value={userInfo.birthdate.day}
                 placeholder={"jj"}
                 keyboardType="number-pad"
-                onChangeText={(e) =>
+                maxLength={2}
+                returnKeyType="next"
+                onChangeText={(e) => [
+                  handleBirthdateChange(e, "day"),
                   setUserInfo({
                     ...userInfo,
                     birthdate: { ...userInfo.birthdate, day: e },
-                  })
-                }
+                  }),
+                ]}
               />
               <Text style={styles.slash}>/</Text>
               <TextInput
+                ref={monthRef}
                 style={styles.input}
                 value={userInfo.birthdate.month}
                 placeholder={"mm"}
                 keyboardType="number-pad"
-                onChangeText={(e) =>
+                maxLength={2}
+                returnKeyType="next"
+                onKeyPress={(e) => handleBackspace(e, "month")}
+                onChangeText={(e) => [
+                  handleBirthdateChange(e, "month"),
                   setUserInfo({
                     ...userInfo,
                     birthdate: { ...userInfo.birthdate, month: e },
-                  })
-                }
+                  }),
+                ]}
               />
               <Text style={styles.slash}>/</Text>
               <TextInput
+                ref={yearRef}
                 style={styles.input}
                 value={userInfo.birthdate.year}
                 placeholder={"aaaa"}
                 keyboardType="number-pad"
-                onChangeText={(e) =>
+                maxLength={4}
+                onBlur={validateBirthdate}
+                onKeyPress={(e) => handleBackspace(e, "year")}
+                onChangeText={(e) => [
+                  handleBirthdateChange(e, "year"),
                   setUserInfo({
                     ...userInfo,
                     birthdate: { ...userInfo.birthdate, year: e },
-                  })
-                }
+                  }),
+                ]}
               />
             </View>
           </View>

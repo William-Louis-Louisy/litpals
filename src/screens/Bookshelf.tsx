@@ -8,9 +8,12 @@ import {
   Platform,
   Dimensions,
   FlatList,
+  ScrollView,
+  Keyboard,
+  Modal,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { FontAwesome6 } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import debounce from "lodash.debounce";
 import axios from "axios";
 import Config from "react-native-config";
@@ -23,6 +26,12 @@ const Bookshelf = ({ navigation }: any) => {
   const [bookshelf, setBookshelf] = useState([] as any[]);
   const { setIsLoggedIn, setIsSignedUp } = useAuth();
   const { state, dispatch } = useUserContext();
+  const [currentBookDetail, setCurrentBookDetail] = useState({} as any);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const toggleModal = () => {
+    setModalVisible(!modalVisible);
+  };
 
   const getBooks = async () => {
     try {
@@ -30,7 +39,8 @@ const Bookshelf = ({ navigation }: any) => {
         `https://www.googleapis.com/books/v1/volumes`,
         {
           params: {
-            q: bookQuery,
+            q: `intitle:${bookQuery}`,
+            langRestrict: "fr",
             key: Config.API_KEY,
             maxResults: 10,
           },
@@ -59,6 +69,7 @@ const Bookshelf = ({ navigation }: any) => {
   const handleSelectBook = (book: any) => {
     setBookshelf([...bookshelf, book]);
     setBookQuery("");
+    toggleModal();
   };
 
   const handleClick = async () => {
@@ -70,7 +81,6 @@ const Bookshelf = ({ navigation }: any) => {
           value: bookshelf.map((book) => book.id),
         },
       });
-      console.log("STATE", state);
       navigateToApp();
     } catch (e) {
       console.error(e);
@@ -86,15 +96,16 @@ const Bookshelf = ({ navigation }: any) => {
     setIsLoggedIn(true);
   };
 
+  useEffect(() => {
+    currentBookDetail.volumeInfo && toggleModal();
+  }, [currentBookDetail]);
+
   return (
     <View style={styles.pageLayout}>
       <View style={styles.progressHeader}>
         <Pressable onPress={navigateToPrev}>
           <FontAwesome6 name="chevron-left" size={24} color="black" />
         </Pressable>
-        {/* <Pressable style={styles.btnOutlineDiscreet}>
-          <Text style={styles.btnOutlineDiscreetText}>Skip</Text>
-        </Pressable> */}
       </View>
 
       <View>
@@ -106,6 +117,15 @@ const Bookshelf = ({ navigation }: any) => {
               data={bookshelf}
               renderItem={({ item }) => (
                 <Pressable style={styles.book}>
+                  <FontAwesome
+                    style={styles.deleteBook}
+                    onPress={() =>
+                      setBookshelf(bookshelf.filter((book) => book != item))
+                    }
+                    name="times-circle"
+                    size={24}
+                    color="white"
+                  />
                   <Image
                     style={styles.thumbnail}
                     source={{
@@ -128,26 +148,58 @@ const Bookshelf = ({ navigation }: any) => {
             placeholder={"Search for a book"}
             onChangeText={setBookQuery}
           />
-          <View style={styles.booksDropdownContainer}>
-            <FlatList
-              numColumns={3}
-              columnWrapperStyle={styles.booksDropdownCol}
-              data={booksDrowpdown}
-              renderItem={({ item }) => (
-                <Pressable onPress={() => handleSelectBook(item)}>
+          <ScrollView
+            keyboardShouldPersistTaps={"always"}
+            style={styles.booksDropdownStyle}
+            contentContainerStyle={styles.booksDropdownContainer}
+          >
+            {booksDrowpdown.map((book: any) => {
+              return (
+                <Pressable
+                  onPress={() => setCurrentBookDetail(book)}
+                  key={book.id}
+                >
                   <Image
                     style={styles.thumbnail}
                     source={{
-                      uri: item.volumeInfo.imageLinks.smallThumbnail,
+                      uri: book.volumeInfo.imageLinks.smallThumbnail,
                     }}
                   />
                 </Pressable>
-              )}
-              keyExtractor={(item) => item.volumeInfo.title}
-            />
-          </View>
+              );
+            })}
+          </ScrollView>
         </View>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={toggleModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modal}>
+            <FontAwesome
+              style={styles.deleteBook}
+              onPress={toggleModal}
+              name="times-circle"
+              size={24}
+              color="black"
+            />
+            <Text>
+              {currentBookDetail?.volumeInfo?.authors?.join() || "N/A"}
+            </Text>
+            <Text>{currentBookDetail?.volumeInfo?.description || "N/A"}</Text>
+            <Pressable
+              style={styles.btnPrimary}
+              onPress={() => handleSelectBook(currentBookDetail)}
+            >
+              <Text style={styles.btnText}>Add to bookshelf</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
       <Pressable onPress={handleClick} style={styles.btnPrimary}>
         <Text style={styles.btnText}>Done</Text>
@@ -159,6 +211,25 @@ const Bookshelf = ({ navigation }: any) => {
 export default Bookshelf;
 
 const styles = StyleSheet.create({
+  modal: {
+    backgroundColor: "white",
+    height: "60%",
+    width: "80%",
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  deleteBook: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    zIndex: 5,
+  },
   thumbnail: {
     height: 150,
     width: 100,
@@ -169,6 +240,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   booksDropdownContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-evenly",
+    rowGap: 10,
+  },
+  booksDropdownStyle: {
     backgroundColor: "lightgray",
     paddingTop: 10,
     height: Dimensions.get("window").height / 3,
@@ -184,14 +261,16 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 5,
+    position: "relative",
+    paddingTop: 10,
   },
   booksContainer: {
     // backgroundColor: "lightgray",
     marginBottom: -10,
     zIndex: 3,
-    maxHeight: 150,
+    maxHeight: 160,
     paddingTop: 0,
-    height: 150,
+    height: 160,
   },
   bookshelfThickness: {
     width: Dimensions.get("window").width,

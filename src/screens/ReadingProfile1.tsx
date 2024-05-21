@@ -55,7 +55,7 @@ const ReadingProfile1 = ({ navigation }: any) => {
   };
 
   const navigateToNext = () => {
-    navigation.navigate("Bookshelf");
+    navigation.navigate("ReadingProfile2");
   };
 
   return (

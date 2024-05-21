@@ -4,9 +4,9 @@ import Profile from "../screens/Profile";
 import SignIn from "../screens/SignIn";
 import PersonalInfo from "../screens/PersonalInfo";
 import MeetingProfile from "../screens/MeetingProfile";
-import ReadingProfile from "../screens/ReadingProfile2";
-import ReadingProfile2 from "../screens/ReadingProfile1";
+import ReadingProfile2 from "../screens/ReadingProfile2";
 import Bookshelf from "../screens/Bookshelf";
+import ReadingProfile1 from "../screens/ReadingProfile1";
 
 const AuthStack = createNativeStackNavigator();
 
@@ -51,8 +51,8 @@ const Routes = () => {
           options={{ headerShown: false }}
         />
         <SignUpStack.Screen
-          name="ReadingProfile"
-          component={ReadingProfile}
+          name="ReadingProfile1"
+          component={ReadingProfile1}
           options={{ headerShown: false }}
         />
         <SignUpStack.Screen
