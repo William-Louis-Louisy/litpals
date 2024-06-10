@@ -12,6 +12,8 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserContext } from "../contexts/UserContext";
+import colors from "../constants/colors";
+import { useFonts } from "expo-font";
 
 const defaultUserInfo = {
   bookTypes: [] as string[],
@@ -22,6 +24,13 @@ const defaultUserInfo = {
 const ReadingProfile1 = ({ navigation }: any) => {
   const [userInfo, setUserInfo] = useState(defaultUserInfo);
   const { dispatch } = useUserContext();
+
+  const [fontsLoaded] = useFonts({
+    "Nunito-Regular": require("../../assets/fonts/Nunito-Regular.ttf"),
+    "Nunito-Medium": require("../../assets/fonts/Nunito-Medium.ttf"),
+    "Nunito-SemiBold": require("../../assets/fonts/Nunito-SemiBold.ttf"),
+    "Nunito-Black": require("../../assets/fonts/Nunito-Black.ttf"),
+  });
 
   const handleSelectBookType = (type: string) => {
     if (!userInfo.bookTypes.includes(type))
@@ -59,164 +68,180 @@ const ReadingProfile1 = ({ navigation }: any) => {
   };
 
   return (
-    <View style={styles.pageLayout}>
+    <View style={styles.page}>
       <View style={styles.progressHeader}>
         <Pressable onPress={navigateToPrev}>
-          <FontAwesome6 name="chevron-left" size={24} color="black" />
+          <FontAwesome6
+            name="chevron-left"
+            size={24}
+            color={colors.light.secondary}
+          />
         </Pressable>
         <Pressable onPress={navigateToNext} style={styles.btnOutlineDiscreet}>
           <Text style={styles.btnOutlineDiscreetText}>Skip</Text>
         </Pressable>
       </View>
 
-      <View>
-        <Text style={styles.label}>BOOK TYPE</Text>
-        <View style={styles.flexContainer}>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              userInfo.bookTypes.includes("paperback") &&
-                styles.pressableSelected,
-            ]}
-            onPress={() => handleSelectBookType("paperback")}
-          >
-            <Ionicons name="book" size={24} color="black" />
-            <Text>Paperback</Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              userInfo.bookTypes.includes("e-book") && styles.pressableSelected,
-            ]}
-            onPress={() => handleSelectBookType("e-book")}
-          >
-            <FontAwesome5 name="tablet-alt" size={24} color="black" />
-            <Text>E-Book</Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              userInfo.bookTypes.includes("hardcover") &&
-                styles.pressableSelected,
-            ]}
-            onPress={() => handleSelectBookType("hardcover")}
-          >
-            <FontAwesome6 name="book-bookmark" size={24} color="black" />
-            <Text>Hardcover</Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              userInfo.bookTypes.includes("pocket-book") &&
-                styles.pressableSelected,
-            ]}
-            onPress={() => handleSelectBookType("pocket-book")}
-          >
-            <FontAwesome name="book" size={24} color="black" />
-            <Text>Pocket book</Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              userInfo.bookTypes.includes("audio-book") &&
-                styles.pressableSelected,
-            ]}
-            onPress={() => handleSelectBookType("audio-book")}
-          >
-            <FontAwesome6 name="headphones" size={24} color="black" />
-            <Text>Audio book</Text>
-          </Pressable>
+      <View style={styles.content}>
+        <View>
+          <Text style={styles.label}>Book Type</Text>
+          <View style={styles.flexContainer}>
+            <Pressable
+              style={[
+                styles.textIconBtn,
+                userInfo.bookTypes.includes("paperback") &&
+                  styles.pressableSelected,
+              ]}
+              onPress={() => handleSelectBookType("paperback")}
+            >
+              <Ionicons name="book" size={24} color="black" />
+              <Text>Paperback</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.textIconBtn,
+                userInfo.bookTypes.includes("e-book") &&
+                  styles.pressableSelected,
+              ]}
+              onPress={() => handleSelectBookType("e-book")}
+            >
+              <FontAwesome5 name="tablet-alt" size={24} color="black" />
+              <Text>E-Book</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.textIconBtn,
+                userInfo.bookTypes.includes("hardcover") &&
+                  styles.pressableSelected,
+              ]}
+              onPress={() => handleSelectBookType("hardcover")}
+            >
+              <FontAwesome6 name="book-bookmark" size={24} color="black" />
+              <Text>Hardcover</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.textIconBtn,
+                userInfo.bookTypes.includes("pocket-book") &&
+                  styles.pressableSelected,
+              ]}
+              onPress={() => handleSelectBookType("pocket-book")}
+            >
+              <FontAwesome name="book" size={24} color="black" />
+              <Text>Pocket book</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.textIconBtn,
+                userInfo.bookTypes.includes("audio-book") &&
+                  styles.pressableSelected,
+              ]}
+              onPress={() => handleSelectBookType("audio-book")}
+            >
+              <FontAwesome6 name="headphones" size={24} color="black" />
+              <Text>Audio book</Text>
+            </Pressable>
+          </View>
         </View>
 
-        <Text style={styles.label}>READING LANGUAGES</Text>
-        <View style={styles.flexContainer}>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              userInfo.readingLanguages === "french" &&
-                styles.pressableSelected,
-            ]}
-            onPress={() =>
-              setUserInfo({ ...userInfo, readingLanguages: "french" })
-            }
-          >
-            <Image
-              style={styles.flag}
-              source={require("../../assets/flags/france.png")}
-            />
-            <Text>French</Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              userInfo.readingLanguages === "english" &&
-                styles.pressableSelected,
-            ]}
-            onPress={() =>
-              setUserInfo({ ...userInfo, readingLanguages: "english" })
-            }
-          >
-            <Image
-              style={styles.flag}
-              source={require("../../assets/flags/uk.png")}
-            />
-            <Text>English</Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              userInfo.readingLanguages === "both" && styles.pressableSelected,
-            ]}
-            onPress={() =>
-              setUserInfo({ ...userInfo, readingLanguages: "both" })
-            }
-          >
-            <Image
-              style={styles.flag}
-              source={require("../../assets/flags/uk-fr.png")}
-            />
-            <Text>Both</Text>
-          </Pressable>
+        <View>
+          <Text style={styles.label}>Reading Languages</Text>
+          <View style={styles.flexContainer}>
+            <Pressable
+              style={[
+                styles.textIconBtn,
+                userInfo.readingLanguages === "french" &&
+                  styles.pressableSelected,
+              ]}
+              onPress={() =>
+                setUserInfo({ ...userInfo, readingLanguages: "french" })
+              }
+            >
+              <Image
+                style={styles.flag}
+                source={require("../../assets/flags/france.png")}
+              />
+              <Text>French</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.textIconBtn,
+                userInfo.readingLanguages === "english" &&
+                  styles.pressableSelected,
+              ]}
+              onPress={() =>
+                setUserInfo({ ...userInfo, readingLanguages: "english" })
+              }
+            >
+              <Image
+                style={styles.flag}
+                source={require("../../assets/flags/uk.png")}
+              />
+              <Text>English</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.textIconBtn,
+                userInfo.readingLanguages === "both" &&
+                  styles.pressableSelected,
+              ]}
+              onPress={() =>
+                setUserInfo({ ...userInfo, readingLanguages: "both" })
+              }
+            >
+              <Image
+                style={styles.flag}
+                source={require("../../assets/flags/uk-fr.png")}
+              />
+              <Text>Both</Text>
+            </Pressable>
+          </View>
         </View>
 
-        <Text style={styles.label}>FORMAT</Text>
-        <View style={styles.flexContainer}>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              userInfo.format === "series" && styles.pressableSelected,
-            ]}
-            onPress={() => setUserInfo({ ...userInfo, format: "series" })}
-          >
-            <Ionicons name="library" size={24} color="black" />
-            <Text>Series</Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              userInfo.format === "standalone" && styles.pressableSelected,
-            ]}
-            onPress={() => setUserInfo({ ...userInfo, format: "standalone" })}
-          >
-            <FontAwesome6 name="book" size={24} color="black" />
-            <Text>Standalone</Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.textIconBtn,
-              userInfo.format === "both" && styles.pressableSelected,
-            ]}
-            onPress={() => setUserInfo({ ...userInfo, format: "both" })}
-          >
-            <FontAwesome6 name="grin-hearts" size={24} color="black" />
-            <Text>Both</Text>
-          </Pressable>
+        <View>
+          <Text style={styles.label}>Format</Text>
+          <View style={styles.flexContainer}>
+            <Pressable
+              style={[
+                styles.textIconBtn,
+                userInfo.format === "series" && styles.pressableSelected,
+              ]}
+              onPress={() => setUserInfo({ ...userInfo, format: "series" })}
+            >
+              <Ionicons name="library" size={24} color="black" />
+              <Text>Series</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.textIconBtn,
+                userInfo.format === "standalone" && styles.pressableSelected,
+              ]}
+              onPress={() => setUserInfo({ ...userInfo, format: "standalone" })}
+            >
+              <FontAwesome6 name="book" size={24} color="black" />
+              <Text style={styles.textMed}>Standalone</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.textIconBtn,
+                userInfo.format === "both" && styles.pressableSelected,
+              ]}
+              onPress={() => setUserInfo({ ...userInfo, format: "both" })}
+            >
+              <FontAwesome6
+                name="grin-hearts"
+                size={24}
+                color={colors.light.textPrimary}
+              />
+              <Text style={styles.textMed}>Both</Text>
+            </Pressable>
+          </View>
         </View>
+
+        <Pressable onPress={handleClick} style={styles.btnPrimary}>
+          <Text style={styles.btnText}>Next</Text>
+        </Pressable>
       </View>
-
-      <Pressable onPress={handleClick} style={styles.btnPrimary}>
-        <Text style={styles.btnText}>Next</Text>
-      </Pressable>
     </View>
   );
 };
@@ -224,6 +249,42 @@ const ReadingProfile1 = ({ navigation }: any) => {
 export default ReadingProfile1;
 
 const styles = StyleSheet.create({
+  textMed: {
+    fontFamily: "Nunito-Medium",
+    color: colors.light.textPrimary,
+  },
+  page: {
+    justifyContent: "space-between",
+    height: "100%",
+    flex: 1,
+    backgroundColor: "#F6D0A2",
+  },
+  progressHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  btnOutlineDiscreet: {
+    borderWidth: 1,
+    borderColor: colors.light.secondary,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  btnOutlineDiscreetText: {
+    color: colors.light.secondary,
+  },
+  content: {
+    backgroundColor: colors.light.background,
+    paddingHorizontal: 20,
+    paddingTop: 30,
+    paddingBottom: 10,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    gap: 30,
+  },
   pressableSelected: {
     borderWidth: 2,
     borderColor: "orange",
@@ -232,30 +293,6 @@ const styles = StyleSheet.create({
   flag: {
     width: 30,
     height: 20,
-  },
-  pageLayout: {
-    paddingHorizontal: 20,
-    paddingVertical: 30,
-    display: "flex",
-    justifyContent: "space-between",
-    height: "100%",
-    flex: 1,
-  },
-  progressHeader: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  btnOutlineDiscreet: {
-    borderWidth: 1,
-    borderColor: "lightgray",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  btnOutlineDiscreetText: {
-    color: "lightgray",
   },
   flexContainer: {
     display: "flex",
@@ -276,8 +313,10 @@ const styles = StyleSheet.create({
     minWidth: "30%",
   },
   label: {
-    marginBottom: 5,
-    fontSize: 20,
+    marginBottom: 10,
+    fontSize: 22,
+    fontFamily: "Nunito-SemiBold",
+    color: colors.light.secondary,
   },
   input: {
     borderWidth: 1,
@@ -289,15 +328,14 @@ const styles = StyleSheet.create({
   },
   btnPrimary: {
     width: "100%",
-    backgroundColor: "teal",
+    backgroundColor: colors.light.accent,
     paddingHorizontal: 15,
     paddingVertical: 15,
     borderRadius: 50,
-    display: "flex",
     alignItems: "center",
   },
   btnText: {
-    color: "white",
+    color: colors.light.background,
     fontSize: 20,
   },
   bgOrangeLight: {

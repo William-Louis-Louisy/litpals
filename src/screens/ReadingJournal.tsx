@@ -34,7 +34,7 @@ const defaultUserInfo = {
   city: "",
 };
 
-const Profile = ({ navigation }: IRouterProps) => {
+const ReadingJournal = ({ navigation }: IRouterProps) => {
   const { state, dispatch } = useUserContext();
   const [userInfo, setUserInfo] = useState(defaultUserInfo);
   const [isLitMatchEnabled, setIsLitMatchEnabled] = useState(
@@ -42,6 +42,7 @@ const Profile = ({ navigation }: IRouterProps) => {
   );
   const { isLoggedIn, setIsLoggedIn, setIsSignedUp } = useAuth();
   const [uid, setUid] = useState("");
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     try {
@@ -64,128 +65,81 @@ const Profile = ({ navigation }: IRouterProps) => {
     }
   }, []);
 
-  useEffect(() => {
-    console.log("isloged in", isLoggedIn);
-
-    if (isLoggedIn) getUserInfo();
-  }, [uid]);
-
-  const getUserInfo = async () => {
-    try {
-      const data = await axios.get(`http://192.168.0.49:5000/users/${uid}`);
-      console.log(data.data.user);
-      if (data) dispatch({ type: "SET_USER_DATA", payload: data.data.user });
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleLogOut = async () => {
-    try {
-      FIREBASE_AUTH.signOut();
-      setIsLoggedIn(false);
-      setIsSignedUp(false);
-      console.log("LOGGED OUT SUCCESSFULLY");
-    } catch (error: any) {
-      console.log(error);
-    }
-  };
-
-  const openReadingJournal = () => {
-    navigation.navigate("ReadingJournal");
-  };
-
   return (
-    <View style={{ height: "100%" }}>
-      <View style={styles.profileHeader}>
-        <View style={styles.imgContainer}>
-          <Image
-            style={styles.avatar}
-            source={{
-              uri: state.personalInfo.avatar
-                ? "data:image/jpeg;base64," + state.personalInfo.avatar
-                : "https://source.unsplash.com/random/?woman",
+    <View>
+      <Text>Reading Journal</Text>
+      <ScrollView
+        keyboardShouldPersistTaps={"handled"}
+        contentContainerStyle={[styles.card, styles.mb15, { gap: 20 }]}
+      >
+        <Text>Current read</Text>
+        <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
+          <Pressable style={styles.book}>
+            <Image
+              style={styles.thumbnail}
+              source={{
+                uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
+              }}
+            />
+          </Pressable>
+          <View style={{ gap: 20, flex: 1 }}>
+            <View style={{ gap: 5 }}>
+              <Text style={{ fontSize: 20 }}>
+                Un Palais d'Épines et de Roses
+              </Text>
+              <Text style={{ fontSize: 15 }}>Sarah J Maas</Text>
+            </View>
+            <Pressable>
+              <Text style={styles.btnTextOutlinePrimary}>
+                View book details
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+        <Pressable style={styles.btnOutlinePrimary}>
+          <Text style={styles.btnTextOutlinePrimary}>
+            I've finished reading this book
+          </Text>
+        </Pressable>
+        <View style={{ gap: 5 }}>
+          <Text style={{ fontSize: 15 }}>Start date: 07/06/2024</Text>
+          <Text style={{ fontSize: 15 }}>Progress: 263 (72%)</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+            }}
+          >
+            <Text style={{ fontSize: 15 }}>Notes:</Text>
+            <Text style={{ fontSize: 15 }} onPress={setEditNotes}>
+              <FontAwesome6 name="edit" size={24} color="black" /> Edit notes
+            </Text>
+          </View>
+          <TextInput
+            editable
+            multiline
+            numberOfLines={4}
+            onChangeText={(text) => setNotes(text)}
+            value={notes}
+            style={{
+              padding: 10,
+              backgroundColor: "white",
+              height: 90,
+              borderRadius: 10,
             }}
           />
-        </View>
-        <Text>{state.personalInfo.username}</Text>
-        <Text>
-          {state.personalInfo.birthdate.day}/
-          {state.personalInfo.birthdate.month}/
-          {state.personalInfo.birthdate.year}
-        </Text>
-        <Text>{state.meetingInfo.city}, FR</Text>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.pageLayout}>
-        <View style={[styles.card, styles.mb15, { gap: 20 }]}>
-          <Text>Current read</Text>
-          <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
-            <Pressable style={styles.book}>
-              <Image
-                style={styles.thumbnail}
-                source={{
-                  uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
-                }}
-              />
-            </Pressable>
-            <View style={{ gap: 20, flex: 1 }}>
-              <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 20 }}>
-                  Un Palais d'Épines et de Roses
-                </Text>
-                <Text style={{ fontSize: 15 }}>Sarah J Maas</Text>
-              </View>
-              <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 15 }}>Start date: 07/06/2024</Text>
-                <Text style={{ fontSize: 15 }}>Progress: 263 (72%)</Text>
-              </View>
-            </View>
-          </View>
-          <Pressable
-            style={styles.btnOutlinePrimary}
-            onPress={openReadingJournal}
-          >
-            <Text style={styles.btnTextOutlinePrimary}>
-              Open reading journal
-            </Text>
+          <Text style={{ fontSize: 15 }}>Favorite quotes:</Text>
+          <Pressable>
+            <Text style={styles.btnTextOutlinePrimary}>Add a new quote</Text>
           </Pressable>
         </View>
-
-        <View style={[styles.card, styles.mb15]}>
-          <Text>Reading challenges</Text>
-        </View>
-
-        <View style={[styles.card, styles.mb15]}>
-          <Text>My posts</Text>
-        </View>
-
-        <View style={styles.card}>
-          <View>
-            <Text>Favorite genres:</Text>
-            <View style={styles.tagsContainer}>
-              {state.readingInfo2.favoriteGenres.fiction.map(
-                (genre: string) => {
-                  return (
-                    <Text key={genre} style={styles.tag}>
-                      {genre}
-                    </Text>
-                  );
-                }
-              )}
-            </View>
-          </View>
-        </View>
-
-        <Pressable style={styles.btnPrimary} onPress={handleLogOut}>
-          <Text style={styles.btnText}>Log out</Text>
-        </Pressable>
       </ScrollView>
     </View>
   );
 };
 
-export default Profile;
+export default ReadingJournal;
 
 const styles = StyleSheet.create({
   thumbnail: {

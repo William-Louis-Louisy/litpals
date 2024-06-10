@@ -17,6 +17,7 @@ import { AuthProvider } from "./src/contexts/AuthContext";
 import Routes from "./src/routes/Routes";
 import { UserProvider } from "./src/contexts/UserContext";
 import "react-native-reanimated";
+import colors from "./src/constants/colors";
 
 export default function App() {
   const CustomToast = ({ text1, text2 }: { text1: string; text2: string }) => (
@@ -60,10 +61,13 @@ export default function App() {
   // }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <AuthProvider>
+    <AuthProvider>
+      <SafeAreaView style={{ flex: 0, backgroundColor: "#F6D0A2" }} />
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: colors.light.background }}
+      >
         <UserProvider>
-          <StatusBar style="auto" />
+          {/* <StatusBar backgroundColor={colors.light.accent} /> */}
           {/* <View style={styles.container}>
         <Text>Open up App.tsx to start working on your app bae!</Text>
         <Btn label={"COUCOU BEBEW"} onClick={() => console.log("Je t'aime")} />
@@ -73,8 +77,8 @@ export default function App() {
           </NavigationContainer>
           <Toast config={toastConfig} />
         </UserProvider>
-      </AuthProvider>
-    </SafeAreaView>
+      </SafeAreaView>
+    </AuthProvider>
   );
 }
 

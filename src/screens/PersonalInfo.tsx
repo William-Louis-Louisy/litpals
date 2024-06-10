@@ -16,8 +16,12 @@ import axios from "axios";
 import Config from "react-native-config";
 import { useUserContext } from "../contexts/UserContext";
 import { showToast } from "../utils/Toasts";
+import * as ImagePicker from "expo-image-picker";
+import { any } from "prop-types";
+import colors from "../constants/colors";
 
 const defaultUserInfo = {
+  avatar: "",
   username: "",
   birthdate: {
     day: "",
@@ -52,6 +56,10 @@ const PersonalInfo = ({ navigation }: any) => {
     { label: "Content creator", value: "content-creator" },
     { label: "Book merch maker", value: "merch-maker" },
   ];
+  const [selectedImage, setSelectedImage] = useState("");
+  const avatar = selectedImage
+    ? "data:image/jpeg;base64," + selectedImage
+    : "https://source.unsplash.com/random/?woman";
 
   const handleClick = async () => {
     try {
@@ -61,6 +69,7 @@ const PersonalInfo = ({ navigation }: any) => {
           field: "personalInfo",
           value: {
             ...userInfo,
+            avatar: selectedImage,
             birthdatePrivate: isBirthdatePrivate,
             accountType,
             litMatchEnabled: isLitMatchEnabled,
@@ -135,17 +144,31 @@ const PersonalInfo = ({ navigation }: any) => {
     }
   };
 
+  const pickImageAsync = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].base64);
+    } else {
+      alert("You did not select any image.");
+    }
+  };
+
   return (
-    <View style={styles.pageLayout}>
+    <View style={styles.page}>
       <View>
-        <View style={styles.imgContainer}>
+        <Pressable style={styles.imgContainer} onPress={pickImageAsync}>
           <Image
             style={styles.avatar}
             source={{
-              uri: "https://source.unsplash.com/random/?woman",
+              uri: avatar,
             }}
           />
-        </View>
+        </Pressable>
         <Text style={styles.label}>USERNAME</Text>
         <TextInput
           style={[styles.input, styles.mb15]}
@@ -283,13 +306,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     margin: 10,
   },
-  pageLayout: {
+  page: {
     paddingHorizontal: 20,
     paddingVertical: 30,
-    display: "flex",
     justifyContent: "space-between",
     height: "100%",
     flex: 1,
+    backgroundColor: colors.light.primary,
   },
   imgContainer: {
     display: "flex",

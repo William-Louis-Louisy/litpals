@@ -7,6 +7,8 @@ import {
   Platform,
   Dimensions,
   KeyboardAvoidingView,
+  Button,
+  StatusBar,
 } from "react-native";
 import React, { useState } from "react";
 import {
@@ -16,12 +18,15 @@ import {
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { showToast } from "../utils/Toasts";
 import { useAuth } from "../contexts/AuthContext";
+import { useUserContext } from "../contexts/UserContext";
+import colors from "../constants/colors";
 
 const SignIn = () => {
   const [userMail, setUserMail] = useState("");
   const [userPwd, setUserPwd] = useState("");
   const auth = FIREBASE_AUTH;
   const { setIsLoggedIn, setIsSignedUp } = useAuth();
+  const { dispatch } = useUserContext();
 
   const handleLogIn = async () => {
     try {
@@ -48,7 +53,16 @@ const SignIn = () => {
         userMail,
         userPwd
       );
-      if (userCredential) setIsSignedUp(true);
+      if (userCredential) {
+        dispatch({
+          type: "UPDATE_FIELD",
+          payload: {
+            field: "uid",
+            value: userCredential.user.uid,
+          },
+        });
+        setIsSignedUp(true);
+      }
     } catch (error: any) {
       if (error.code === "auth/email-already-in-use")
         showToast({
@@ -180,6 +194,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     height: "100%",
     flex: 1,
+    backgroundColor: colors.light.background,
   },
   progressHeader: {
     display: "flex",
@@ -227,7 +242,7 @@ const styles = StyleSheet.create({
   },
   btnPrimary: {
     width: "100%",
-    backgroundColor: "teal",
+    backgroundColor: colors.light.accent,
     paddingHorizontal: 15,
     paddingVertical: 15,
     borderRadius: 50,
@@ -237,7 +252,7 @@ const styles = StyleSheet.create({
   btnPrimaryOutline: {
     width: "100%",
     borderWidth: 2,
-    borderColor: "teal",
+    borderColor: colors.light.accent,
     paddingHorizontal: 15,
     paddingVertical: 15,
     borderRadius: 50,
@@ -245,7 +260,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   colorTeal: {
-    color: "teal",
+    color: colors.light.accent,
   },
   btnText: {
     color: "white",

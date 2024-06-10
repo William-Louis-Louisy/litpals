@@ -81,7 +81,16 @@ const Bookshelf = ({ navigation }: any) => {
           value: bookshelf.map((book) => book.id),
         },
       });
-      navigateToApp();
+
+      const data = await axios.post(
+        `http://192.168.0.49:5000/books`,
+        bookshelf.map((book) => ({
+          id: book.id,
+          title: book.volumeInfo.title,
+          thumbnail: book.volumeInfo.imageLinks.smallThumbnail,
+        }))
+      );
+      // navigateToApp();
     } catch (e) {
       console.error(e);
     }
@@ -91,10 +100,10 @@ const Bookshelf = ({ navigation }: any) => {
     navigation.goBack();
   };
 
-  const navigateToApp = () => {
-    setIsSignedUp(false);
-    setIsLoggedIn(true);
-  };
+  // const navigateToApp = () => {
+  //   setIsSignedUp(false);
+  //   setIsLoggedIn(true);
+  // };
 
   useEffect(() => {
     currentBookDetail.volumeInfo && toggleModal();
@@ -140,6 +149,7 @@ const Bookshelf = ({ navigation }: any) => {
           <View style={styles.bookshelf}></View>
           <View style={styles.bookshelfThickness}></View>
         </View>
+
         <View>
           <Text>Add books to your bookshelf</Text>
           <TextInput

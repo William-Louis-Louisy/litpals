@@ -16,6 +16,7 @@ import debounce from "lodash.debounce";
 import Checkbox from "expo-checkbox";
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import { useUserContext } from "../contexts/UserContext";
+import colors from "../constants/colors";
 
 const defaultUserInfo = {
   favoriteAuthors: [],
@@ -178,7 +179,7 @@ const ReadingProfile2 = ({ navigation }: any) => {
       </View>
 
       <View style={styles.pageContent}>
-        <View>
+        <View style={styles.section}>
           <Text style={styles.label}>FAVORITE AUTHORS</Text>
           <TextInput
             style={styles.input}
@@ -320,6 +321,11 @@ const ReadingProfile2 = ({ navigation }: any) => {
 export default ReadingProfile2;
 
 const styles = StyleSheet.create({
+  section: {
+    backgroundColor: colors.light.accent,
+    borderRadius: 10,
+    padding: 10,
+  },
   chosenItemsContainer: {
     flexDirection: "row",
     gap: 10,
@@ -377,6 +383,7 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "space-between",
     flex: 1,
+    backgroundColor: colors.light.background,
   },
   progressHeader: {
     display: "flex",
@@ -423,10 +430,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 5,
     fontSize: 20,
+    backgroundColor: colors.light.background,
   },
   btnPrimary: {
     width: "100%",
-    backgroundColor: "teal",
+    backgroundColor: colors.light.secondary,
     paddingHorizontal: 15,
     paddingVertical: 15,
     borderRadius: 50,

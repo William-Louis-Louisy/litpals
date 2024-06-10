@@ -6,9 +6,12 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
+import { useAuth } from "./AuthContext";
 
 interface IUserData {
+  uid: string;
   personalInfo: {
+    avatar: string;
     username: string;
     birthdate: {
       day: string;
@@ -45,7 +48,9 @@ interface IUserData {
 }
 
 const initialState: IUserData = {
+  uid: "",
   personalInfo: {
+    avatar: "",
     username: "",
     birthdate: {
       day: "",
@@ -110,6 +115,8 @@ function userReducer(state: IUserData, action: Action) {
       return { ...state, [action.payload.field]: action.payload.value };
     case "RESET":
       return initialState;
+    case "SET_USER_DATA":
+      return { ...action.payload };
     default:
       return state;
   }
@@ -117,11 +124,19 @@ function userReducer(state: IUserData, action: Action) {
 
 export const UserProvider = ({ children }: IUserProviderProps) => {
   const [state, dispatch] = useReducer(userReducer, initialState);
+  const { isLoggedIn, setIsSignedUp, setIsLoggedIn } = useAuth();
 
   const submitUserData = async () => {
     try {
+      console.log("stoute", state);
+
       const userData = state;
       const data = await axios.post(`http://192.168.0.49:5000/users`, userData);
+
+      if (data.data) {
+        setIsSignedUp(false);
+        setIsLoggedIn(true);
+      }
 
       // Set dataSubmitted to true after successful submission
       //   setDataSubmitted(true);
@@ -133,7 +148,7 @@ export const UserProvider = ({ children }: IUserProviderProps) => {
   };
 
   useEffect(() => {
-    if (state.personalInfo.username) submitUserData();
+    if (!isLoggedIn && state.personalInfo.username) submitUserData();
   }, [state.bookshelf]);
 
   return (

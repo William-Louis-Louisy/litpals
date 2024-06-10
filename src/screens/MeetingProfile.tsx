@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TextInput,
   Platform,
+  Keyboard,
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import React, { useEffect, useState } from "react";

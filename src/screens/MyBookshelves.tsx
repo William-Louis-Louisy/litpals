@@ -7,7 +7,8 @@ import {
   TextInput,
   Platform,
   Button,
-  ScrollView,
+  FlatList,
+  Dimensions,
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import React, { useEffect, useState } from "react";
@@ -23,6 +24,7 @@ import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import { useUserContext } from "../contexts/UserContext";
 import colors from "../constants/colors";
+import Config from "react-native-config";
 
 interface IRouterProps {
   navigation: NavigationProp<any, any>;
@@ -34,7 +36,7 @@ const defaultUserInfo = {
   city: "",
 };
 
-const Profile = ({ navigation }: IRouterProps) => {
+const MyBookshelves = ({ navigation }: IRouterProps) => {
   const { state, dispatch } = useUserContext();
   const [userInfo, setUserInfo] = useState(defaultUserInfo);
   const [isLitMatchEnabled, setIsLitMatchEnabled] = useState(
@@ -42,6 +44,13 @@ const Profile = ({ navigation }: IRouterProps) => {
   );
   const { isLoggedIn, setIsLoggedIn, setIsSignedUp } = useAuth();
   const [uid, setUid] = useState("");
+  const [books, setBooks] = useState([]);
+  const [unfoldShelf, setUnfoldShelf] = useState(false);
+  const [shelves, setShelves] = useState([]);
+
+  useEffect(() => {
+    console.log(books);
+  }, [books]);
 
   useEffect(() => {
     try {
@@ -65,129 +74,124 @@ const Profile = ({ navigation }: IRouterProps) => {
   }, []);
 
   useEffect(() => {
-    console.log("isloged in", isLoggedIn);
+    getBooks();
+  }, []);
 
-    if (isLoggedIn) getUserInfo();
-  }, [uid]);
-
-  const getUserInfo = async () => {
+  const getBooks = async () => {
     try {
-      const data = await axios.get(`http://192.168.0.49:5000/users/${uid}`);
-      console.log(data.data.user);
-      if (data) dispatch({ type: "SET_USER_DATA", payload: data.data.user });
+      const books = await axios.get("http://192.168.0.49:5000/books", {
+        params: { books: state.bookshelf },
+      });
+      if (books.data) setBooks(books.data.books);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleLogOut = async () => {
-    try {
-      FIREBASE_AUTH.signOut();
-      setIsLoggedIn(false);
-      setIsSignedUp(false);
-      console.log("LOGGED OUT SUCCESSFULLY");
-    } catch (error: any) {
-      console.log(error);
-    }
-  };
+  useEffect(() => {
+    if (unfoldShelf) {
+      const bloop = [];
+      for (let i = 0; i < books.length; i += 3) {
+        console.log(books.slice(i, i + 3));
 
-  const openReadingJournal = () => {
-    navigation.navigate("ReadingJournal");
-  };
+        bloop.push(books.slice(i, i + 3));
+      }
+      setShelves(bloop);
+    }
+  }, [unfoldShelf]);
 
   return (
-    <View style={{ height: "100%" }}>
-      <View style={styles.profileHeader}>
-        <View style={styles.imgContainer}>
-          <Image
-            style={styles.avatar}
-            source={{
-              uri: state.personalInfo.avatar
-                ? "data:image/jpeg;base64," + state.personalInfo.avatar
-                : "https://source.unsplash.com/random/?woman",
-            }}
-          />
-        </View>
-        <Text>{state.personalInfo.username}</Text>
-        <Text>
-          {state.personalInfo.birthdate.day}/
-          {state.personalInfo.birthdate.month}/
-          {state.personalInfo.birthdate.year}
-        </Text>
-        <Text>{state.meetingInfo.city}, FR</Text>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.pageLayout}>
-        <View style={[styles.card, styles.mb15, { gap: 20 }]}>
-          <Text>Current read</Text>
-          <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
-            <Pressable style={styles.book}>
-              <Image
-                style={styles.thumbnail}
-                source={{
-                  uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
-                }}
-              />
-            </Pressable>
-            <View style={{ gap: 20, flex: 1 }}>
-              <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 20 }}>
-                  Un Palais d'Épines et de Roses
-                </Text>
-                <Text style={{ fontSize: 15 }}>Sarah J Maas</Text>
-              </View>
-              <View style={{ gap: 5 }}>
-                <Text style={{ fontSize: 15 }}>Start date: 07/06/2024</Text>
-                <Text style={{ fontSize: 15 }}>Progress: 263 (72%)</Text>
-              </View>
-            </View>
-          </View>
+    <View style={styles.pageLayout}>
+      <Text>Bookshelves</Text>
+      <View style={styles.bookshelfBg}>
+        <View style={styles.shelfHeader}>
+          <Text style={{ fontSize: 18, padding: 15 }}>All</Text>
           <Pressable
-            style={styles.btnOutlinePrimary}
-            onPress={openReadingJournal}
+            onPress={() => setUnfoldShelf(!unfoldShelf)}
+            style={{ marginRight: 15 }}
           >
-            <Text style={styles.btnTextOutlinePrimary}>
-              Open reading journal
-            </Text>
+            <FontAwesome6 name="chevron-down" size={24} color="black" />
           </Pressable>
         </View>
-
-        <View style={[styles.card, styles.mb15]}>
-          <Text>Reading challenges</Text>
-        </View>
-
-        <View style={[styles.card, styles.mb15]}>
-          <Text>My posts</Text>
-        </View>
-
-        <View style={styles.card}>
-          <View>
-            <Text>Favorite genres:</Text>
-            <View style={styles.tagsContainer}>
-              {state.readingInfo2.favoriteGenres.fiction.map(
-                (genre: string) => {
-                  return (
-                    <Text key={genre} style={styles.tag}>
-                      {genre}
-                    </Text>
-                  );
-                }
-              )}
+        {unfoldShelf ? (
+          shelves.map((shelf, index) => (
+            <React.Fragment key={index}>
+              <View style={styles.booksContainer}>
+                <FlatList
+                  horizontal={true}
+                  data={shelf}
+                  renderItem={({ item }) => (
+                    <Pressable style={styles.book}>
+                      <FontAwesome
+                        style={styles.deleteBook}
+                        name="times-circle"
+                        size={24}
+                        color="white"
+                      />
+                      <Image
+                        style={styles.thumbnail}
+                        source={{
+                          uri: item.thumbnail,
+                        }}
+                      />
+                    </Pressable>
+                  )}
+                  keyExtractor={(item) => item.title}
+                  scrollEnabled={false}
+                />
+              </View>
+              <View style={styles.bookshelf}></View>
+              <View style={styles.bookshelfThickness}></View>
+            </React.Fragment>
+          ))
+        ) : (
+          <>
+            <View style={styles.booksContainer}>
+              <FlatList
+                horizontal={true}
+                data={books}
+                renderItem={({ item }) => (
+                  <Pressable style={styles.book}>
+                    <FontAwesome
+                      style={styles.deleteBook}
+                      name="times-circle"
+                      size={24}
+                      color="white"
+                    />
+                    <Image
+                      style={styles.thumbnail}
+                      source={{
+                        uri: item.thumbnail,
+                      }}
+                    />
+                  </Pressable>
+                )}
+                keyExtractor={(item) => item.title}
+              />
             </View>
-          </View>
-        </View>
-
-        <Pressable style={styles.btnPrimary} onPress={handleLogOut}>
-          <Text style={styles.btnText}>Log out</Text>
-        </Pressable>
-      </ScrollView>
+            <View style={styles.bookshelf}></View>
+            <View style={styles.bookshelfThickness}></View>
+          </>
+        )}
+      </View>
     </View>
   );
 };
 
-export default Profile;
+export default MyBookshelves;
 
 const styles = StyleSheet.create({
+  shelfHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  deleteBook: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    zIndex: 5,
+  },
   thumbnail: {
     height: 150,
     width: 100,
@@ -196,6 +200,7 @@ const styles = StyleSheet.create({
   book: {
     height: 150,
     width: 100,
+    marginLeft: 15,
     shadowColor: "#000",
     shadowOffset: {
       width: 8,
@@ -204,18 +209,52 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 5,
     position: "relative",
+    paddingTop: 10,
   },
-  pressableSelected: {
-    borderWidth: 2,
-    borderColor: "orange",
+  booksContainer: {
+    // backgroundColor: "lightgray",
+    marginBottom: -10,
+    zIndex: 3,
+    maxHeight: 160,
+    paddingTop: 0,
+    height: 160,
+  },
+  bookshelfThickness: {
+    width: Dimensions.get("window").width,
+    marginLeft: -20,
+    height: 4,
+    backgroundColor: "rgba(255, 222, 173, 1)",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+  },
+  bookshelf: {
+    width: Dimensions.get("window").width,
+    height: 0,
+    marginLeft: -20,
+    borderLeftWidth: 20,
+    borderLeftColor: "transparent",
+    borderRightWidth: 20,
+    borderRightColor: "transparent",
+    borderBottomWidth: 25,
+    borderBottomColor: "rgba(255, 222, 173, 1)",
+  },
+  bookshelfBg: {
     backgroundColor: "rgba(255, 222, 173, .5)",
+    borderRadius: 5,
+    paddingBottom: 30,
   },
   pageLayout: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.light.background,
     paddingHorizontal: 20,
     paddingVertical: 30,
+    // display: "flex",
     // justifyContent: "space-between",
-    // height: "200%",
+    height: "100%",
     // flex: 1,
   },
   imgContainer: {
@@ -223,7 +262,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   avatar: {
-    width: "30%",
+    width: "40%",
     aspectRatio: 1 / 1,
     borderRadius: 200,
   },
@@ -245,7 +284,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   card: {
-    backgroundColor: "#fbe0b1",
+    backgroundColor: "rgba(255, 222, 173, .5)",
     borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 30,
@@ -312,24 +351,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 15,
     borderRadius: 50,
+    display: "flex",
     alignItems: "center",
   },
   btnText: {
     color: "white",
-    fontSize: 20,
-  },
-  btnOutlinePrimary: {
-    width: "100%",
-    // backgroundColor: colors.light.accent,
-    paddingHorizontal: 15,
-    paddingVertical: 15,
-    borderRadius: 50,
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: colors.light.accent,
-  },
-  btnTextOutlinePrimary: {
-    color: colors.light.accent,
     fontSize: 20,
   },
   bgOrangeLight: {
