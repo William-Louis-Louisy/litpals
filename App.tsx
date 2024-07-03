@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import Btn from "./src/components/Btn";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaView } from "react-native";
@@ -18,6 +18,8 @@ import Routes from "./src/routes/Routes";
 import { UserProvider } from "./src/contexts/UserContext";
 import "react-native-reanimated";
 import colors from "./src/constants/colors";
+import * as NavigationBar from "expo-navigation-bar";
+import { FontProvider } from "./src/contexts/FontContext";
 
 export default function App() {
   const CustomToast = ({ text1, text2 }: { text1: string; text2: string }) => (
@@ -38,6 +40,13 @@ export default function App() {
   );
 
   const toastConfig = { error: (props: any) => <CustomToast {...props} /> };
+
+  // useEffect(() => {
+  //   if (Platform.OS === "android") {
+  //     NavigationBar.setVisibilityAsync("hidden");
+  //     NavigationBar.setBehaviorAsync("overlay-swipe");
+  //   }
+  // }, []);
 
   // const AppLayout = () => {
   //   return (
@@ -62,22 +71,27 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <SafeAreaView style={{ flex: 0, backgroundColor: "#F6D0A2" }} />
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: colors.light.background }}
-      >
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#FDF5ED" }}>
         <UserProvider>
-          {/* <StatusBar backgroundColor={colors.light.accent} /> */}
-          {/* <View style={styles.container}>
+          <FontProvider>
+            {/* <StatusBar backgroundColor={colors.light.accent} /> */}
+            {/* <View style={styles.container}>
         <Text>Open up App.tsx to start working on your app bae!</Text>
         <Btn label={"COUCOU BEBEW"} onClick={() => console.log("Je t'aime")} />
       </View> */}
-          <NavigationContainer>
-            <Routes />
-          </NavigationContainer>
-          <Toast config={toastConfig} />
+            <NavigationContainer>
+              <Routes />
+            </NavigationContainer>
+            <Toast config={toastConfig} />
+          </FontProvider>
         </UserProvider>
       </SafeAreaView>
+      <SafeAreaView
+        style={{
+          flex: 0,
+          backgroundColor: "#543757",
+        }}
+      ></SafeAreaView>
     </AuthProvider>
   );
 }

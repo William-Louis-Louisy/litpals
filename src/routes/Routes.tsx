@@ -16,29 +16,71 @@ import MyBookshelves from "../screens/MyBookshelves";
 import { Ionicons } from "@expo/vector-icons";
 import Browse from "../screens/Browse";
 import ReadingJournal from "../screens/ReadingJournal";
+import BookDetails from "../screens/BookDetails";
+import BookChallengeDuration from "../screens/BookChallengeDuration";
+import BookChallengeName from "../screens/BookChallengeName";
+import BookChallengeGoal from "../screens/BookChallengeGoal";
+import BookChallenge from "../screens/BookChallenge";
 
 const AuthStack = createNativeStackNavigator();
 
 const SignUpStack = createNativeStackNavigator();
 
-const ProfileStack = createNativeStackNavigator();
+const AppStack = createNativeStackNavigator();
 
 const Tab = createBottomTabNavigator();
 
-const ProfileStackScreen = () => {
+const TabScreens = () => {
   return (
-    <ProfileStack.Navigator>
-      <ProfileStack.Screen
+    <Tab.Navigator
+      screenOptions={{
+        tabBarStyle: {
+          backgroundColor: "#543757",
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          padding: 20,
+        },
+        tabBarShowLabel: false,
+      }}
+    >
+      <Tab.Screen
         name="Profile"
         component={Profile}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          tabBarIcon: () => (
+            <FontAwesome name="user-circle" size={24} color="black" />
+          ),
+        }}
       />
-      <ProfileStack.Screen
-        name="ReadingJournal"
-        component={ReadingJournal}
-        options={{ headerShown: false }}
+      <Tab.Screen
+        name="LitPal"
+        component={LitPal}
+        options={{
+          tabBarIcon: () => (
+            <FontAwesome6 name="comments" size={24} color="black" />
+          ),
+        }}
       />
-    </ProfileStack.Navigator>
+      <Tab.Screen
+        name="MyBookshelves"
+        component={MyBookshelves}
+        options={{
+          headerShown: false,
+          tabBarIcon: () => <Ionicons name="library" size={24} color="black" />,
+        }}
+      />
+      <Tab.Screen
+        name="Browse"
+        component={Browse}
+        options={{
+          tabBarIcon: () => (
+            <FontAwesome6 name="magnifying-glass" size={24} color="black" />
+          ),
+        }}
+      />
+      {/* <Tab.Screen name="Settings" component={SettingsScreen} /> */}
+    </Tab.Navigator>
   );
 };
 
@@ -47,47 +89,43 @@ const Routes = () => {
 
   if (isLoggedIn)
     return (
-      <Tab.Navigator screenOptions={{ tabBarShowLabel: false }}>
-        <Tab.Screen
-          name="ProfileStack"
-          component={ProfileStackScreen}
-          options={{
-            headerShown: false,
-            tabBarIcon: () => (
-              <FontAwesome name="user-circle" size={24} color="black" />
-            ),
-          }}
+      <AppStack.Navigator>
+        <AppStack.Screen
+          name="Profile"
+          component={TabScreens}
+          options={{ headerShown: false }}
         />
-        <Tab.Screen
-          name="LitPal"
-          component={LitPal}
-          options={{
-            tabBarIcon: () => (
-              <FontAwesome6 name="comments" size={24} color="black" />
-            ),
-          }}
+        <AppStack.Screen
+          name="ReadingJournal"
+          component={ReadingJournal}
+          options={{ headerShown: false }}
         />
-        <Tab.Screen
-          name="MyBookshelves"
-          component={MyBookshelves}
-          options={{
-            headerShown: false,
-            tabBarIcon: () => (
-              <Ionicons name="library" size={24} color="black" />
-            ),
-          }}
+        <AppStack.Screen
+          name="BookDetails"
+          component={BookDetails}
+          options={{ headerShown: false }}
         />
-        <Tab.Screen
-          name="Browse"
-          component={Browse}
-          options={{
-            tabBarIcon: () => (
-              <FontAwesome6 name="magnifying-glass" size={24} color="black" />
-            ),
-          }}
+        <AppStack.Screen
+          name="BookChallenge"
+          component={BookChallenge}
+          options={{ headerShown: false }}
         />
-        {/* <Tab.Screen name="Settings" component={SettingsScreen} /> */}
-      </Tab.Navigator>
+        <AppStack.Screen
+          name="BookChallengeDuration"
+          component={BookChallengeDuration}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="BookChallengeName"
+          component={BookChallengeName}
+          options={{ headerShown: false }}
+        />
+        <AppStack.Screen
+          name="BookChallengeGoal"
+          component={BookChallengeGoal}
+          options={{ headerShown: false }}
+        />
+      </AppStack.Navigator>
     );
   else if (isSignedUp)
     return (

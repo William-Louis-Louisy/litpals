@@ -8,6 +8,7 @@ import {
   Platform,
   Button,
   ScrollView,
+  Modal,
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import React, { useEffect, useState } from "react";
@@ -43,6 +44,9 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
   const { isLoggedIn, setIsLoggedIn, setIsSignedUp } = useAuth();
   const [uid, setUid] = useState("");
   const [notes, setNotes] = useState("");
+  const [openQuoteModal, setOpenQuoteModal] = useState(false);
+  const [openReviewModal, setOpenReviewModal] = useState(false);
+  const [rating, setRating] = useState(0);
 
   useEffect(() => {
     try {
@@ -65,14 +69,18 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
     }
   }, []);
 
+  const handleRating = (stars: number) => {
+    if (rating === stars) setRating(stars - 0.5);
+    else setRating(stars);
+  };
+
   return (
     <View>
-      <Text>Reading Journal</Text>
       <ScrollView
         keyboardShouldPersistTaps={"handled"}
         contentContainerStyle={[styles.card, styles.mb15, { gap: 20 }]}
       >
-        <Text>Current read</Text>
+        <Text>Reading Journal</Text>
         <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
           <Pressable style={styles.book}>
             <Image
@@ -89,14 +97,17 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
               </Text>
               <Text style={{ fontSize: 15 }}>Sarah J Maas</Text>
             </View>
-            <Pressable>
+            <Pressable onPress={() => navigation.navigate("BookDetails")}>
               <Text style={styles.btnTextOutlinePrimary}>
                 View book details
               </Text>
             </Pressable>
           </View>
         </View>
-        <Pressable style={styles.btnOutlinePrimary}>
+        <Pressable
+          style={styles.btnOutlinePrimary}
+          onPress={() => setOpenReviewModal(!openReviewModal)}
+        >
           <Text style={styles.btnTextOutlinePrimary}>
             I've finished reading this book
           </Text>
@@ -104,18 +115,7 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
         <View style={{ gap: 5 }}>
           <Text style={{ fontSize: 15 }}>Start date: 07/06/2024</Text>
           <Text style={{ fontSize: 15 }}>Progress: 263 (72%)</Text>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "baseline",
-            }}
-          >
-            <Text style={{ fontSize: 15 }}>Notes:</Text>
-            <Text style={{ fontSize: 15 }} onPress={setEditNotes}>
-              <FontAwesome6 name="edit" size={24} color="black" /> Edit notes
-            </Text>
-          </View>
+          <Text style={{ fontSize: 15 }}>Notes:</Text>
           <TextInput
             editable
             multiline
@@ -130,10 +130,219 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
             }}
           />
           <Text style={{ fontSize: 15 }}>Favorite quotes:</Text>
-          <Pressable>
+          <Pressable onPress={() => setOpenQuoteModal(!openQuoteModal)}>
             <Text style={styles.btnTextOutlinePrimary}>Add a new quote</Text>
           </Pressable>
         </View>
+        <View
+          style={{
+            alignItems: "baseline",
+            backgroundColor: "white",
+            borderRadius: 5,
+            paddingVertical: 10,
+            paddingHorizontal: 15,
+          }}
+        >
+          <Text style={{ fontSize: 18 }}>
+            <FontAwesome6 name="quote-left" size={15} color="black" /> Hello,
+            Feyre darling.{" "}
+            <FontAwesome6 name="quote-right" size={15} color="black" />
+          </Text>
+          <Text style={{ fontSize: 15, alignSelf: "flex-end" }}>
+            — Rhysand, p. 272
+          </Text>
+        </View>
+        <View
+          style={{
+            alignItems: "baseline",
+            backgroundColor: "white",
+            borderRadius: 5,
+            paddingVertical: 10,
+            paddingHorizontal: 15,
+          }}
+        >
+          <Text style={{ fontSize: 18 }}>
+            <FontAwesome6 name="quote-left" size={15} color="black" /> Un truc
+            vachement plus long, parce que forcément ya des gens qui vont mettre
+            des pavés de 4 mètres. Tout un tralala à n'en plus finir, mais bon
+            en même temps ils font bien ce qu'ils veulent.{" "}
+            <FontAwesome6 name="quote-right" size={15} color="black" />
+          </Text>
+          <Text style={{ fontSize: 15, alignSelf: "flex-end" }}>
+            — Feyre, p. 297
+          </Text>
+        </View>
+        <View
+          style={{
+            alignItems: "baseline",
+            backgroundColor: "white",
+            borderRadius: 5,
+            paddingVertical: 10,
+            paddingHorizontal: 15,
+          }}
+        >
+          <Text style={{ fontSize: 18 }}>
+            <FontAwesome6 name="quote-left" size={15} color="black" /> Un truc
+            juste assez long pour générer un saut de ligne.{" "}
+            <FontAwesome6 name="quote-right" size={15} color="black" />
+          </Text>
+          <Text style={{ fontSize: 15, alignSelf: "flex-end" }}>
+            — The Bone Carver, p. 305
+          </Text>
+        </View>
+
+        {/* NEW QUOTE MODAL */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={openQuoteModal}
+          onRequestClose={() => setOpenQuoteModal(!openQuoteModal)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modal}>
+              <Text>Add a new quote</Text>
+              <FontAwesome
+                style={styles.deleteBook}
+                onPress={() => setOpenQuoteModal(!openQuoteModal)}
+                name="times-circle"
+                size={24}
+                color="black"
+              />
+              <TextInput
+                editable
+                multiline
+                numberOfLines={4}
+                onChangeText={(text) => setNotes(text)}
+                value={notes}
+                style={{
+                  padding: 10,
+                  borderWidth: 2,
+                  borderColor: "lightgray",
+                  height: 90,
+                  borderRadius: 10,
+                  marginTop: 20,
+                }}
+              />
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 5,
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text>Said by</Text>
+                <TextInput
+                  editable
+                  onChangeText={(text) => setNotes(text)}
+                  value={notes}
+                  style={{
+                    padding: 10,
+                    borderWidth: 2,
+                    borderColor: "lightgray",
+                    borderRadius: 10,
+                    width: "80%",
+                    marginVertical: 10,
+                  }}
+                />
+              </View>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+              >
+                <Text>on page</Text>
+                <TextInput
+                  editable
+                  onChangeText={(text) => setNotes(text)}
+                  value={notes}
+                  style={{
+                    padding: 10,
+                    borderWidth: 2,
+                    borderColor: "lightgray",
+                    borderRadius: 10,
+                    width: "80%",
+                    marginVertical: 10,
+                  }}
+                />
+              </View>
+              <Pressable style={styles.btnPrimary}>
+                <Text style={styles.btnText}>Add quote</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+
+        {/* REVIEW MODAL */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={openReviewModal}
+          onRequestClose={() => setOpenReviewModal(!openReviewModal)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modal}>
+              <Text>Add a review</Text>
+              <FontAwesome
+                style={styles.deleteBook}
+                onPress={() => setOpenReviewModal(!openReviewModal)}
+                name="times-circle"
+                size={24}
+                color="black"
+              />
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 10,
+                  justifyContent: "center",
+                  marginTop: 20,
+                }}
+              >
+                {[1, 2, 3, 4, 5].map((star) => {
+                  return (
+                    <Pressable key={star} onPress={() => handleRating(star)}>
+                      {rating >= star ? (
+                        <FontAwesome name="star" size={35} color="black" />
+                      ) : rating === star - 0.5 ? (
+                        <FontAwesome
+                          name="star-half-full"
+                          size={35}
+                          color="black"
+                        />
+                      ) : (
+                        <FontAwesome name="star-o" size={35} color="blac  k" />
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <View style={{ gap: 20 }}>
+                <TextInput
+                  editable
+                  multiline
+                  numberOfLines={4}
+                  onChangeText={(text) => setNotes(text)}
+                  value={notes}
+                  style={{
+                    padding: 10,
+                    borderWidth: 2,
+                    borderColor: "lightgray",
+                    height: 90,
+                    borderRadius: 10,
+                    marginTop: 20,
+                  }}
+                />
+                <Pressable style={styles.btnPrimary}>
+                  <Text style={styles.btnText}>Done</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.btnOutlinePrimary}
+                  onPress={() => setOpenReviewModal(!openReviewModal)}
+                >
+                  <Text style={styles.btnTextOutlinePrimary}>Cancel</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </View>
   );
@@ -142,6 +351,25 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
 export default ReadingJournal;
 
 const styles = StyleSheet.create({
+  deleteBook: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    zIndex: 5,
+  },
+  modal: {
+    backgroundColor: "white",
+    height: "60%",
+    width: "80%",
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
   thumbnail: {
     height: 150,
     width: 100,
