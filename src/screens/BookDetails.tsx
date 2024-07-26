@@ -155,7 +155,7 @@ const BookDetails = ({ navigation }: IRouterProps) => {
             style={{
               width: 40,
               height: 40,
-              borderRadius: "50%",
+              borderRadius: 50,
               backgroundColor: "lightgray",
             }}
           ></View>

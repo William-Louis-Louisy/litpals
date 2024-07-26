@@ -74,7 +74,7 @@ export default function App() {
       <SafeAreaView style={{ flex: 1, backgroundColor: "#FDF5ED" }}>
         <UserProvider>
           <FontProvider>
-            {/* <StatusBar backgroundColor={colors.light.accent} /> */}
+            <StatusBar backgroundColor={"white"} />
             {/* <View style={styles.container}>
         <Text>Open up App.tsx to start working on your app bae!</Text>
         <Btn label={"COUCOU BEBEW"} onClick={() => console.log("Je t'aime")} />

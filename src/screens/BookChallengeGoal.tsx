@@ -2,55 +2,19 @@ import {
   View,
   Text,
   Pressable,
-  Image,
   StyleSheet,
   TextInput,
   Platform,
   Dimensions,
-  FlatList,
-  ScrollView,
-  Keyboard,
-  Modal,
 } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import debounce from "lodash.debounce";
 import axios from "axios";
 import Config from "react-native-config";
-import { useAuth } from "../contexts/AuthContext";
-import { useUserContext } from "../contexts/UserContext";
-import DateInput from "../components/DateInput";
 import ShelfCreation from "../components/ShelfCreation";
 
-const BookChallengeGoal = ({ navigation }: any) => {
-  const [challenge, setChallenge] = useState({
-    name: "New",
-    bookQuantity: 0,
-    books: [],
-  });
-  const challengeInputRef = useRef(null);
-  const [timeframe, setTimeframe] = useState("");
-  const [from, setFrom] = useState({ day: "", month: "", year: "" });
-  const [to, setTo] = useState({ day: "", month: "", year: "" });
-  const today = new Date();
-
-  const focusChallengeInput = () => {
-    console.log("custom");
-
-    if (challengeInputRef.current) {
-      setChallenge({ ...challenge, name: "" });
-      challengeInputRef.current.focus();
-    }
-  };
-
-  const navigateToPrev = () => {
-    navigation.goBack();
-  };
-
-  const navigateToHome = () => {
-    navigation.navigate("Profile");
-  };
-
+const BookChallengeGoal = ({ challenge, setChallenge }: any) => {
   return (
     <View style={{ gap: 30, flex: 1 }}>
       <View>
@@ -63,7 +27,7 @@ const BookChallengeGoal = ({ navigation }: any) => {
         >
           Would you like to add books to this challenge ?
         </Text>
-        <ShelfCreation props={"props"} />
+        <ShelfCreation challenge={challenge} setChallenge={setChallenge} />
       </View>
       <View>
         <Text

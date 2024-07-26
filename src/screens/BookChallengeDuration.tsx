@@ -8,13 +8,14 @@ import {
   Dimensions,
   ScrollView,
 } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import DateInput from "../components/DateInput";
+import Checkbox from "expo-checkbox";
 
-const BookChallengeDuration = ({ navigation }: any) => {
+const BookChallengeDuration = ({ challenge, setChallenge }: any) => {
   const dayRef = useRef<TextInput>(null);
   const today = new Date();
-  const [timeframe, setTimeframe] = useState("month");
+  const [noTimeframe, setNoTimeframe] = useState(false);
   const [from, setFrom] = useState({
     day: "01",
     month: (today.getMonth() + 1).toString().padStart(2, "0"),
@@ -29,20 +30,47 @@ const BookChallengeDuration = ({ navigation }: any) => {
   });
 
   const focusDateInput = () => {
-    console.log("custom", dayRef, dayRef.current);
-
     if (dayRef.current) {
       dayRef.current.focus();
     }
   };
 
-  const navigateToPrev = () => {
-    navigation.goBack();
-  };
+  useEffect(() => {
+    const name =
+      challenge.type === "month"
+        ? `${new Date().toLocaleString("en-US", {
+            month: "long",
+          })} Reading Marathon`
+        : challenge.type === "year"
+        ? `${new Date().getFullYear().toString()} Reading Challenge`
+        : "";
 
-  const navigateToNext = () => {
-    navigation.navigate("BookChallengeName");
-  };
+    setChallenge({
+      ...challenge,
+      name,
+      timeframe: { from: from, to: to },
+    });
+  }, [challenge.type]);
+
+  useEffect(() => {
+    if (noTimeframe)
+      setChallenge({
+        ...challenge,
+        name: "Reading Challenge",
+        timeframe: {
+          from: {
+            day: "",
+            month: "",
+            year: "",
+          },
+          to: {
+            day: "",
+            month: "",
+            year: "",
+          },
+        },
+      });
+  }, [noTimeframe]);
 
   return (
     <ScrollView
@@ -55,12 +83,12 @@ const BookChallengeDuration = ({ navigation }: any) => {
       <View style={{ flexDirection: "row", gap: 10 }}>
         <Pressable
           style={
-            timeframe === "month"
+            challenge.type === "month"
               ? styles.challengeBtn
               : styles.challengeBtnOutline
           }
           onPress={() => [
-            setTimeframe("month"),
+            setChallenge({ ...challenge, type: "month" }),
             setFrom({
               day: "01",
               month: (today.getMonth() + 1).toString().padStart(2, "0"),
@@ -77,7 +105,7 @@ const BookChallengeDuration = ({ navigation }: any) => {
         >
           <Text
             style={
-              timeframe === "month"
+              challenge.type === "month"
                 ? styles.challengeBtnText
                 : styles.challengeBtnOutlineText
             }
@@ -87,12 +115,12 @@ const BookChallengeDuration = ({ navigation }: any) => {
         </Pressable>
         <Pressable
           style={
-            timeframe === "year"
+            challenge.type === "year"
               ? styles.challengeBtn
               : styles.challengeBtnOutline
           }
           onPress={() => [
-            setTimeframe("year"),
+            setChallenge({ ...challenge, type: "year" }),
             setFrom({
               day: "01",
               month: "01",
@@ -107,7 +135,7 @@ const BookChallengeDuration = ({ navigation }: any) => {
         >
           <Text
             style={
-              timeframe === "year"
+              challenge.type === "year"
                 ? styles.challengeBtnText
                 : styles.challengeBtnOutlineText
             }
@@ -117,13 +145,13 @@ const BookChallengeDuration = ({ navigation }: any) => {
         </Pressable>
         <Pressable
           style={
-            timeframe === "custom"
+            challenge.type === "custom"
               ? styles.challengeBtn
               : styles.challengeBtnOutline
           }
           onPress={() => [
             focusDateInput(),
-            setTimeframe("custom"),
+            setChallenge({ ...challenge, type: "custom" }),
             setFrom({
               day: "",
               month: "",
@@ -138,7 +166,7 @@ const BookChallengeDuration = ({ navigation }: any) => {
         >
           <Text
             style={
-              timeframe === "custom"
+              challenge.type === "custom"
                 ? styles.challengeBtnText
                 : styles.challengeBtnOutlineText
             }
@@ -177,6 +205,20 @@ const BookChallengeDuration = ({ navigation }: any) => {
           </Text>
           <DateInput bloop={to} setDate={setTo} />
         </View>
+        <Pressable
+          onPress={() => setNoTimeframe(!noTimeframe)}
+          style={styles.checkboxContainer}
+        >
+          <Text style={{ fontSize: 18, fontFamily: "Nunito-Medium" }}>
+            I don't want to set a timeframe
+          </Text>
+          <Checkbox
+            style={styles.checkbox}
+            value={noTimeframe}
+            onValueChange={setNoTimeframe}
+            color={"orange"}
+          />
+        </Pressable>
       </View>
     </ScrollView>
   );
@@ -185,6 +227,17 @@ const BookChallengeDuration = ({ navigation }: any) => {
 export default BookChallengeDuration;
 
 const styles = StyleSheet.create({
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 8,
+    paddingVertical: 5,
+    marginTop: 20,
+  },
+  checkbox: {
+    borderRadius: 100,
+  },
   smallerInput: {
     borderWidth: 1,
     borderColor: "gray",

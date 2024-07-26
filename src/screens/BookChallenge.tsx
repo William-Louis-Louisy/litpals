@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  Platform,
-  Dimensions,
-} from "react-native";
+import { View, Text, Pressable, StyleSheet, Platform } from "react-native";
 import React, { useState } from "react";
 import { FontAwesome6 } from "@expo/vector-icons";
 import BookChallengeDuration from "./BookChallengeDuration";
@@ -14,10 +7,23 @@ import BookChallengeGoal from "./BookChallengeGoal";
 
 const BookChallenge = ({ navigation }: any) => {
   const [challenge, setChallenge] = useState({
-    name: "New",
+    name: "June Reading Marathon",
     description: "",
-    type: "monthly",
-    timeframe: { from: "", to: "" },
+    type: "month",
+    timeframe: {
+      from: {
+        day: "01",
+        month: (new Date().getMonth() + 1).toString().padStart(2, "0"),
+        year: new Date().getFullYear().toString(),
+      },
+      to: {
+        day: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+          .getDate()
+          .toString(),
+        month: (new Date().getMonth() + 1).toString().padStart(2, "0"),
+        year: new Date().getFullYear().toString(),
+      },
+    },
     bookQuantity: 0,
     books: [],
   });
@@ -30,8 +36,10 @@ const BookChallenge = ({ navigation }: any) => {
   };
 
   const navigateToNext = () => {
-    if (step === 3) navigation.navigate("Profile");
-    else setStep(step + 1);
+    if (step === 3) {
+      navigation.navigate("Profile");
+      console.log("challenge", challenge);
+    } else setStep(step + 1);
   };
 
   return (
@@ -54,11 +62,14 @@ const BookChallenge = ({ navigation }: any) => {
       </View>
 
       {step === 1 ? (
-        <BookChallengeDuration />
+        <BookChallengeDuration
+          challenge={challenge}
+          setChallenge={setChallenge}
+        />
       ) : step === 2 ? (
-        <BookChallengeName />
+        <BookChallengeName challenge={challenge} setChallenge={setChallenge} />
       ) : (
-        <BookChallengeGoal />
+        <BookChallengeGoal challenge={challenge} setChallenge={setChallenge} />
       )}
 
       <Pressable onPress={navigateToNext} style={styles.btnPrimary}>

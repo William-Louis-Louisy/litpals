@@ -26,6 +26,7 @@ import axios from "axios";
 import { useUserContext } from "../contexts/UserContext";
 import colors from "../constants/colors";
 import { useFonts } from "expo-font";
+import ChallengeCard from "../components/ChallengeCard";
 
 interface IRouterProps {
   navigation: NavigationProp<any, any>;
@@ -170,7 +171,8 @@ const Profile = ({ navigation }: IRouterProps) => {
 
         <View style={[styles.card, styles.mb15, { gap: 10 }]}>
           <Text style={styles.sectionTitle}>Reading challenges</Text>
-          <View
+          <ChallengeCard />
+          {/* <View
             style={{
               backgroundColor: "#EFE6EF",
               borderRadius: 10,
@@ -246,7 +248,7 @@ const Profile = ({ navigation }: IRouterProps) => {
                 See booklist
               </Text>
             </Pressable>
-          </View>
+          </View> */}
           <Pressable
             style={styles.btnOutlinePrimary}
             onPress={openBookChallenge}
@@ -257,11 +259,11 @@ const Profile = ({ navigation }: IRouterProps) => {
           </Pressable>
         </View>
 
-        <View style={[styles.card, styles.mb15]}>
+        {/* <View style={[styles.card, styles.mb15]}>
           <Text>My posts</Text>
-        </View>
+        </View> */}
 
-        <View style={styles.card}>
+        {/* <View style={styles.card}>
           <View>
             <Text>Favorite genres:</Text>
             <View style={styles.tagsContainer}>
@@ -276,9 +278,9 @@ const Profile = ({ navigation }: IRouterProps) => {
               )}
             </View>
           </View>
-        </View>
+        </View> */}
 
-        <Modal
+        {/* <Modal
           animationType="slide"
           transparent={true}
           visible={openChallengeBooklist}
@@ -325,7 +327,7 @@ const Profile = ({ navigation }: IRouterProps) => {
               />
             </View>
           </View>
-        </Modal>
+        </Modal> */}
 
         <Pressable style={styles.btnPrimary} onPress={handleLogOut}>
           <Text style={styles.btnText}>Log out</Text>

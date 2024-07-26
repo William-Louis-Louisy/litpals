@@ -16,10 +16,9 @@ import axios from "axios";
 import debounce from "lodash.debounce";
 import Config from "react-native-config";
 
-const ShelfCreation = ({ props }: { props: string }) => {
+const ShelfCreation = ({ challenge, setChallenge }: any) => {
   const [bookQuery, setBookQuery] = useState("");
   const [booksDrowpdown, setBooksDropdown] = useState([] as any);
-  const [bookshelf, setBookshelf] = useState([] as any[]);
   const [currentBookDetail, setCurrentBookDetail] = useState({} as any);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -65,7 +64,11 @@ const ShelfCreation = ({ props }: { props: string }) => {
   }, [bookQuery, handleBookChange]);
 
   const handleSelectBook = (book: any) => {
-    setBookshelf([...bookshelf, book]);
+    setChallenge({
+      ...challenge,
+      books: [...challenge.books, book],
+      bookQuantity: challenge.bookQuantity + 1,
+    });
     setBookQuery("");
     toggleModal();
   };
@@ -102,14 +105,20 @@ const ShelfCreation = ({ props }: { props: string }) => {
           <View style={styles.booksContainer}>
             <FlatList
               horizontal={true}
-              data={bookshelf}
+              data={challenge.books}
               renderItem={({ item }) => (
                 <Pressable style={styles.book}>
                   <FontAwesome
                     style={styles.deleteBook}
-                    onPress={() =>
-                      setBookshelf(bookshelf.filter((book) => book != item))
-                    }
+                    onPress={() => {
+                      setChallenge({
+                        ...challenge,
+                        books: challenge.books.filter(
+                          (book: any) => book != item
+                        ),
+                        bookQuantity: challenge.bookQuantity - 1,
+                      });
+                    }}
                     name="times-circle"
                     size={24}
                     color="white"

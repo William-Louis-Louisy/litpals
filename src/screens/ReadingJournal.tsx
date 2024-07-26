@@ -24,6 +24,7 @@ import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import { useUserContext } from "../contexts/UserContext";
 import colors from "../constants/colors";
+import BookProgress from "../components/BookProgress";
 
 interface IRouterProps {
   navigation: NavigationProp<any, any>;
@@ -45,8 +46,11 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
   const [uid, setUid] = useState("");
   const [notes, setNotes] = useState("");
   const [openQuoteModal, setOpenQuoteModal] = useState(false);
+  const [openNoteModal, setOpenNoteModal] = useState(false);
   const [openReviewModal, setOpenReviewModal] = useState(false);
   const [rating, setRating] = useState(0);
+  const [section, setSection] = useState("stats");
+  const [pagesRead, setPagesRead] = useState(0);
 
   useEffect(() => {
     try {
@@ -74,140 +78,292 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
     else setRating(stars);
   };
 
+  const navigateToPrev = () => {
+    navigation.goBack();
+  };
+
+  const handleInputChange = (text: string) => {
+    const value = text.replace(/[^0-9]/g, "");
+    setPagesRead(value === "" ? 0 : Number(value));
+  };
+
   return (
-    <View>
-      <ScrollView
-        keyboardShouldPersistTaps={"handled"}
-        contentContainerStyle={[styles.card, styles.mb15, { gap: 20 }]}
-      >
-        <Text>Reading Journal</Text>
-        <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
-          <Pressable style={styles.book}>
-            <Image
-              style={styles.thumbnail}
-              source={{
-                uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
-              }}
-            />
-          </Pressable>
-          <View style={{ gap: 20, flex: 1 }}>
-            <View style={{ gap: 5 }}>
-              <Text style={{ fontSize: 20 }}>
-                Un Palais d'Épines et de Roses
-              </Text>
-              <Text style={{ fontSize: 15 }}>Sarah J Maas</Text>
-            </View>
-            <Pressable onPress={() => navigation.navigate("BookDetails")}>
-              <Text style={styles.btnTextOutlinePrimary}>
-                View book details
-              </Text>
-            </Pressable>
-          </View>
-        </View>
+    <View style={styles.pageLayout}>
+      <View style={styles.progressHeader}>
         <Pressable
-          style={styles.btnOutlinePrimary}
-          onPress={() => setOpenReviewModal(!openReviewModal)}
+          onPress={navigateToPrev}
+          style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
         >
-          <Text style={styles.btnTextOutlinePrimary}>
-            I've finished reading this book
+          <FontAwesome6 name="chevron-left" size={24} color="black" />
+          <Text style={{ fontFamily: "Nunito-Medium", fontSize: 15 }}>
+            Back
           </Text>
         </Pressable>
-        <View style={{ gap: 5 }}>
-          <Text style={{ fontSize: 15 }}>Start date: 07/06/2024</Text>
-          <Text style={{ fontSize: 15 }}>Progress: 263 (72%)</Text>
-          <Text style={{ fontSize: 15 }}>Notes:</Text>
-          <TextInput
-            editable
-            multiline
-            numberOfLines={4}
-            onChangeText={(text) => setNotes(text)}
-            value={notes}
-            style={{
-              padding: 10,
-              backgroundColor: "white",
-              height: 90,
-              borderRadius: 10,
-            }}
-          />
-          <Text style={{ fontSize: 15 }}>Favorite quotes:</Text>
-          <Pressable onPress={() => setOpenQuoteModal(!openQuoteModal)}>
-            <Text style={styles.btnTextOutlinePrimary}>Add a new quote</Text>
+      </View>
+
+      <ScrollView keyboardShouldPersistTaps={"handled"}>
+        <View style={{ gap: 20, paddingBottom: 20 }}>
+          <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
+            <Pressable style={styles.book}>
+              <Image
+                style={styles.thumbnail}
+                source={{
+                  uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
+                }}
+              />
+            </Pressable>
+            <View style={{ gap: 20, flex: 1 }}>
+              <View style={{ gap: 5 }}>
+                <Text style={{ fontSize: 25, fontFamily: "Nunito-Bold" }}>
+                  Un Palais d'Épines et de Roses
+                </Text>
+                <Text style={{ fontSize: 18, fontFamily: "Nunito-Medium" }}>
+                  Sarah J Maas
+                </Text>
+              </View>
+              <Pressable onPress={() => navigation.navigate("BookDetails")}>
+                <Text
+                  style={[
+                    styles.btnTextOutlinePrimary,
+                    { fontFamily: "Nunito-SemiBold" },
+                  ]}
+                >
+                  View book details
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+          <Pressable
+            style={styles.btnOutlinePrimary}
+            onPress={() => setOpenReviewModal(!openReviewModal)}
+          >
+            <Text style={styles.btnTextOutlinePrimary}>
+              I've finished reading this book
+            </Text>
           </Pressable>
         </View>
-        <View
-          style={{
-            alignItems: "baseline",
-            backgroundColor: "white",
-            borderRadius: 5,
-            paddingVertical: 10,
-            paddingHorizontal: 15,
-          }}
-        >
-          <Text style={{ fontSize: 18 }}>
-            <FontAwesome6 name="quote-left" size={15} color="black" /> Hello,
-            Feyre darling.{" "}
-            <FontAwesome6 name="quote-right" size={15} color="black" />
-          </Text>
-          <Text style={{ fontSize: 15, alignSelf: "flex-end" }}>
-            — Rhysand, p. 272
-          </Text>
-        </View>
-        <View
-          style={{
-            alignItems: "baseline",
-            backgroundColor: "white",
-            borderRadius: 5,
-            paddingVertical: 10,
-            paddingHorizontal: 15,
-          }}
-        >
-          <Text style={{ fontSize: 18 }}>
-            <FontAwesome6 name="quote-left" size={15} color="black" /> Un truc
-            vachement plus long, parce que forcément ya des gens qui vont mettre
-            des pavés de 4 mètres. Tout un tralala à n'en plus finir, mais bon
-            en même temps ils font bien ce qu'ils veulent.{" "}
-            <FontAwesome6 name="quote-right" size={15} color="black" />
-          </Text>
-          <Text style={{ fontSize: 15, alignSelf: "flex-end" }}>
-            — Feyre, p. 297
-          </Text>
-        </View>
-        <View
-          style={{
-            alignItems: "baseline",
-            backgroundColor: "white",
-            borderRadius: 5,
-            paddingVertical: 10,
-            paddingHorizontal: 15,
-          }}
-        >
-          <Text style={{ fontSize: 18 }}>
-            <FontAwesome6 name="quote-left" size={15} color="black" /> Un truc
-            juste assez long pour générer un saut de ligne.{" "}
-            <FontAwesome6 name="quote-right" size={15} color="black" />
-          </Text>
-          <Text style={{ fontSize: 15, alignSelf: "flex-end" }}>
-            — The Bone Carver, p. 305
-          </Text>
+
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <Pressable
+            style={
+              section === "stats"
+                ? styles.challengeBtn
+                : styles.challengeBtnOutline
+            }
+            onPress={() => setSection("stats")}
+          >
+            <Text
+              style={
+                section === "stats"
+                  ? styles.challengeBtnText
+                  : styles.challengeBtnOutlineText
+              }
+            >
+              Stats
+            </Text>
+          </Pressable>
+          <Pressable
+            style={
+              section === "notes"
+                ? styles.challengeBtn
+                : styles.challengeBtnOutline
+            }
+            onPress={() => setSection("notes")}
+          >
+            <Text
+              style={
+                section === "notes"
+                  ? styles.challengeBtnText
+                  : styles.challengeBtnOutlineText
+              }
+            >
+              Notes
+            </Text>
+          </Pressable>
+          <Pressable
+            style={
+              section === "quotes"
+                ? styles.challengeBtn
+                : styles.challengeBtnOutline
+            }
+            onPress={() => setSection("quotes")}
+          >
+            <Text
+              style={
+                section === "quotes"
+                  ? styles.challengeBtnText
+                  : styles.challengeBtnOutlineText
+              }
+            >
+              Quotes
+            </Text>
+          </Pressable>
         </View>
 
-        {/* NEW QUOTE MODAL */}
+        {section === "stats" && (
+          <View style={{ gap: 10, marginTop: 20 }}>
+            <BookProgress />
+            <Text style={styles.profileCard}>
+              You started reading on 07/06/2024
+            </Text>
+            <Text style={styles.profileCard}>
+              On average you read 10 pages per session
+            </Text>
+          </View>
+        )}
+
+        {section === "notes" && (
+          <View style={{ gap: 10, marginTop: 20 }}>
+            <Pressable
+              onPress={() => setOpenNoteModal(!openNoteModal)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                paddingVertical: 8,
+                alignSelf: "flex-start",
+              }}
+            >
+              <FontAwesome6 name="circle-plus" size={25} color="#543757" />
+              <Text style={styles.btnTextOutlinePrimary}>Add a new note</Text>
+            </Pressable>
+            <Text
+              numberOfLines={3}
+              style={{
+                backgroundColor: "white",
+                borderRadius: 10,
+                paddingVertical: 10,
+                paddingHorizontal: 15,
+                fontSize: 15,
+                fontFamily: "Nunito-SemiBold",
+              }}
+            >
+              Voici une note. Je sais pas trop ce qu'elle raconte parce que
+              perso je prends pas de note alors je sais pas trop ce que les gens
+              ont envie d'écrire.
+            </Text>
+            <Text
+              numberOfLines={3}
+              style={{
+                backgroundColor: "white",
+                borderRadius: 10,
+                paddingVertical: 10,
+                paddingHorizontal: 15,
+                fontSize: 15,
+                fontFamily: "Nunito-SemiBold",
+              }}
+            >
+              Une autre note juste pour dire d'avoir du contenu en terme
+              d'affichage, pour mieux me rendre compte. Je sais pas si ce que je
+              viens d'écrire est suffisant pour être tronquer alors j'en rajoute
+              un peu.
+            </Text>
+          </View>
+        )}
+
+        {section === "quotes" && (
+          <View style={{ gap: 10, marginVertical: 20 }}>
+            <Pressable
+              onPress={() => setOpenQuoteModal(!openQuoteModal)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                paddingVertical: 8,
+                alignSelf: "flex-start",
+              }}
+            >
+              <FontAwesome6 name="circle-plus" size={25} color="#543757" />
+              <Text style={styles.btnTextOutlinePrimary}>Add a new quote</Text>
+            </Pressable>
+            <View
+              style={{
+                alignItems: "baseline",
+                backgroundColor: "white",
+                borderRadius: 5,
+                paddingVertical: 10,
+                paddingHorizontal: 15,
+              }}
+            >
+              <Text style={{ fontSize: 18, fontFamily: "Nunito-SemiBold" }}>
+                <FontAwesome6 name="quote-left" size={15} color="black" />{" "}
+                Hello, Feyre darling.{" "}
+                <FontAwesome6 name="quote-right" size={15} color="black" />
+              </Text>
+              <Text
+                style={{
+                  fontSize: 15,
+                  alignSelf: "flex-end",
+                  fontFamily: "Nunito-Medium",
+                }}
+              >
+                — Rhysand, p. 272
+              </Text>
+            </View>
+            <View
+              style={{
+                alignItems: "baseline",
+                backgroundColor: "white",
+                borderRadius: 5,
+                paddingVertical: 10,
+                paddingHorizontal: 15,
+              }}
+            >
+              <Text style={{ fontSize: 18 }}>
+                <FontAwesome6 name="quote-left" size={15} color="black" /> Un
+                truc vachement plus long, parce que forcément ya des gens qui
+                vont mettre des pavés de 4 mètres. Tout un tralala à n'en plus
+                finir, mais bon en même temps ils font bien ce qu'ils veulent.{" "}
+                <FontAwesome6 name="quote-right" size={15} color="black" />
+              </Text>
+              <Text style={{ fontSize: 15, alignSelf: "flex-end" }}>
+                — Feyre, p. 297
+              </Text>
+            </View>
+            <View
+              style={{
+                alignItems: "baseline",
+                backgroundColor: "white",
+                borderRadius: 5,
+                paddingVertical: 10,
+                paddingHorizontal: 15,
+              }}
+            >
+              <Text style={{ fontSize: 18 }}>
+                <FontAwesome6 name="quote-left" size={15} color="black" /> Un
+                truc juste assez long pour générer un saut de ligne.{" "}
+                <FontAwesome6 name="quote-right" size={15} color="black" />
+              </Text>
+              <Text style={{ fontSize: 15, alignSelf: "flex-end" }}>
+                — The Bone Carver, p. 305
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* NEW NOTE MODAL */}
         <Modal
           animationType="slide"
-          transparent={true}
-          visible={openQuoteModal}
-          onRequestClose={() => setOpenQuoteModal(!openQuoteModal)}
+          transparent={false}
+          visible={openNoteModal}
+          onRequestClose={() => setOpenNoteModal(!openNoteModal)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modal}>
-              <Text>Add a new quote</Text>
-              <FontAwesome
-                style={styles.deleteBook}
-                onPress={() => setOpenQuoteModal(!openQuoteModal)}
-                name="times-circle"
-                size={24}
-                color="black"
-              />
+          <View style={styles.modal}>
+            <View style={styles.progressHeader}>
+              <Pressable
+                onPress={() => setOpenNoteModal(!openNoteModal)}
+                style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
+              >
+                <FontAwesome6 name="chevron-left" size={24} color="black" />
+                <Text style={{ fontFamily: "Nunito-Medium", fontSize: 15 }}>
+                  Back
+                </Text>
+              </Pressable>
+            </View>
+            <View style={{ flex: 1, gap: 10 }}>
+              <Text style={{ fontSize: 22, fontFamily: "Nunito-Bold" }}>
+                Create a new note
+              </Text>
               <TextInput
                 editable
                 multiline
@@ -218,9 +374,59 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
                   padding: 10,
                   borderWidth: 2,
                   borderColor: "lightgray",
-                  height: 90,
+                  height: "75%",
                   borderRadius: 10,
-                  marginTop: 20,
+                  marginVertical: 10,
+                  fontSize: 18,
+                  fontFamily: "Nunito-SemiBold",
+                }}
+              />
+            </View>
+            <Pressable
+              style={styles.btnPrimary}
+              onPress={() => setOpenNoteModal(!openNoteModal)}
+            >
+              <Text style={styles.btnText}>Create note</Text>
+            </Pressable>
+          </View>
+        </Modal>
+
+        {/* NEW QUOTE MODAL */}
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={openQuoteModal}
+          onRequestClose={() => setOpenQuoteModal(!openQuoteModal)}
+        >
+          <View style={styles.modal}>
+            <View style={styles.progressHeader}>
+              <Pressable
+                onPress={() => setOpenQuoteModal(!openQuoteModal)}
+                style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
+              >
+                <FontAwesome6 name="chevron-left" size={24} color="black" />
+                <Text style={{ fontFamily: "Nunito-Medium", fontSize: 15 }}>
+                  Back
+                </Text>
+              </Pressable>
+            </View>
+            <View style={{ flex: 1, gap: 10 }}>
+              <Text style={{ fontSize: 22, fontFamily: "Nunito-Bold" }}>
+                Add a new quote
+              </Text>
+              <TextInput
+                editable
+                multiline
+                numberOfLines={4}
+                onChangeText={(text) => setNotes(text)}
+                value={notes}
+                style={{
+                  padding: 10,
+                  borderWidth: 2,
+                  borderColor: "lightgray",
+                  height: 120,
+                  borderRadius: 10,
+                  marginVertical: 10,
                 }}
               />
               <View
@@ -231,7 +437,9 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
                   justifyContent: "space-between",
                 }}
               >
-                <Text>Said by</Text>
+                <Text style={{ fontSize: 18, fontFamily: "Nunito-SemiBold" }}>
+                  said by
+                </Text>
                 <TextInput
                   editable
                   onChangeText={(text) => setNotes(text)}
@@ -241,15 +449,23 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
                     borderWidth: 2,
                     borderColor: "lightgray",
                     borderRadius: 10,
-                    width: "80%",
-                    marginVertical: 10,
+                    width: "75%",
+                    fontSize: 18,
+                    fontFamily: "Nunito-SemiBold",
                   }}
                 />
               </View>
               <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 5,
+                  justifyContent: "space-between",
+                }}
               >
-                <Text>on page</Text>
+                <Text style={{ fontSize: 18, fontFamily: "Nunito-SemiBold" }}>
+                  on page
+                </Text>
                 <TextInput
                   editable
                   onChangeText={(text) => setNotes(text)}
@@ -259,15 +475,19 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
                     borderWidth: 2,
                     borderColor: "lightgray",
                     borderRadius: 10,
-                    width: "80%",
-                    marginVertical: 10,
+                    width: "75%",
+                    fontSize: 18,
+                    fontFamily: "Nunito-SemiBold",
                   }}
                 />
               </View>
-              <Pressable style={styles.btnPrimary}>
-                <Text style={styles.btnText}>Add quote</Text>
-              </Pressable>
             </View>
+            <Pressable
+              style={styles.btnPrimary}
+              onPress={() => setOpenQuoteModal(!openQuoteModal)}
+            >
+              <Text style={styles.btnText}>Add quote</Text>
+            </Pressable>
           </View>
         </Modal>
 
@@ -351,6 +571,50 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
 export default ReadingJournal;
 
 const styles = StyleSheet.create({
+  profileCard: {
+    fontSize: 18,
+    fontFamily: "Nunito-SemiBold",
+    backgroundColor: "white",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+  },
+  challengeBtn: {
+    flex: 1,
+    paddingHorizontal: 5,
+    paddingVertical: 5,
+    borderRadius: 50,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#543757",
+    backgroundColor: "#543757",
+  },
+  challengeBtnText: {
+    color: "white",
+    fontSize: 15,
+    fontFamily: "Nunito-Bold",
+  },
+  challengeBtnOutline: {
+    flex: 1,
+    paddingHorizontal: 5,
+    paddingVertical: 5,
+    borderRadius: 50,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#543757",
+  },
+  challengeBtnOutlineText: {
+    color: "#543757",
+    fontSize: 15,
+    fontFamily: "Nunito-Bold",
+  },
+  progressHeader: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 30,
+  },
   deleteBook: {
     position: "absolute",
     top: 0,
@@ -359,10 +623,8 @@ const styles = StyleSheet.create({
   },
   modal: {
     backgroundColor: "white",
-    height: "60%",
-    width: "80%",
-    borderRadius: 10,
     padding: 20,
+    height: "100%",
   },
   modalOverlay: {
     flex: 1,
@@ -484,35 +746,35 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "gray",
     paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingVertical: 5,
     borderRadius: 5,
     fontSize: 20,
   },
   btnPrimary: {
     width: "100%",
-    backgroundColor: colors.light.accent,
-    paddingHorizontal: 15,
-    paddingVertical: 15,
+    backgroundColor: "#543757",
+    paddingVertical: 12,
     borderRadius: 50,
     alignItems: "center",
   },
   btnText: {
     color: "white",
-    fontSize: 20,
+    fontSize: 22,
+    fontFamily: "Nunito-Bold",
   },
   btnOutlinePrimary: {
     width: "100%",
-    // backgroundColor: colors.light.accent,
     paddingHorizontal: 15,
     paddingVertical: 15,
     borderRadius: 50,
     alignItems: "center",
     borderWidth: 2,
-    borderColor: colors.light.accent,
+    borderColor: "#543757",
   },
   btnTextOutlinePrimary: {
-    color: colors.light.accent,
+    color: "#543757",
     fontSize: 20,
+    fontFamily: "Nunito-SemiBold",
   },
   bgOrangeLight: {
     backgroundColor: "rgba(255, 222, 173, .5)",
@@ -527,7 +789,7 @@ const styles = StyleSheet.create({
     android: {
       pageLayout: {
         paddingHorizontal: 25,
-        paddingVertical: 50,
+        paddingTop: 50,
         display: "flex",
         justifyContent: "space-between",
         height: "100%",
