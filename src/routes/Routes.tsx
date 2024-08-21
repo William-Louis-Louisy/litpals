@@ -7,7 +7,7 @@ import SignIn from "../screens/SignIn";
 import PersonalInfo from "../screens/PersonalInfo";
 import MeetingProfile from "../screens/MeetingProfile";
 import ReadingProfile2 from "../screens/ReadingProfile2";
-import Bookshelf from "../screens/Bookshelf";
+import Bookshelf from "../screens/InitialBookshelf";
 import ReadingProfile1 from "../screens/ReadingProfile1";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -57,6 +57,7 @@ const TabScreens = () => {
         name="LitPal"
         component={LitPal}
         options={{
+          headerShown: false,
           tabBarIcon: () => (
             <FontAwesome6 name="comments" size={24} color="black" />
           ),
@@ -74,6 +75,7 @@ const TabScreens = () => {
         name="Browse"
         component={Browse}
         options={{
+          headerShown: false,
           tabBarIcon: () => (
             <FontAwesome6 name="magnifying-glass" size={24} color="black" />
           ),

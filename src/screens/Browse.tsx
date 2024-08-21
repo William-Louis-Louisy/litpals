@@ -7,9 +7,13 @@ import {
   TextInput,
   Platform,
   Button,
+  ScrollView,
+  Dimensions,
+  FlatList,
+  Animated,
 } from "react-native";
 import Checkbox from "expo-checkbox";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Dropdown } from "react-native-element-dropdown";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -22,6 +26,8 @@ import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import { useUserContext } from "../contexts/UserContext";
 import colors from "../constants/colors";
+import Config from "react-native-config";
+import debounce from "lodash.debounce";
 
 interface IRouterProps {
   navigation: NavigationProp<any, any>;
@@ -34,38 +40,217 @@ const defaultUserInfo = {
 };
 
 const Browse = ({ navigation }: IRouterProps) => {
-  const { state, dispatch } = useUserContext();
-  const [userInfo, setUserInfo] = useState(defaultUserInfo);
-  const [isLitMatchEnabled, setIsLitMatchEnabled] = useState(
-    state.personalInfo.litMatchEnabled
-  );
-  const { isLoggedIn, setIsLoggedIn, setIsSignedUp } = useAuth();
-  const [uid, setUid] = useState("");
+  const [query, setQuery] = useState("");
+  const [booklist, setBooklist] = useState([]);
+  const [currentBookDetail, setCurrentBookDetail] = useState({} as any);
+
+  // useEffect(() => {
+  //   try {
+  //     onAuthStateChanged(FIREBASE_AUTH, (user) => {
+  //       if (user) {
+  //         // User is signed in, see docs for a list of available properties
+  //         // https://firebase.google.com/docs/reference/js/auth.user
+  //         const uid = user.uid;
+  //         console.log("UUUUUUIIIIIDDDDD", uid);
+  //         setUid(uid);
+  //         // ...
+  //       } else {
+  //         // User is signed out
+  //         // ...
+  //         console.log("USER IN NOT LOGGED IN");
+  //       }
+  //     });
+  //   } catch (error: any) {
+  //     console.log("bllop", error.code);
+  //   }
+  // }, []);
+
+  const getBooks = async () => {
+    try {
+      const response = await axios.get(
+        `https://www.googleapis.com/books/v1/volumes`,
+        {
+          params: {
+            q: `intitle:${query}`,
+            langRestrict: "fr",
+            key: Config.API_KEY,
+            maxResults: 10,
+          },
+        }
+      );
+
+      console.log(response.data.items[0]);
+
+      setBooklist(
+        response.data.items.filter(
+          (item: any) =>
+            item.volumeInfo.imageLinks &&
+            item.volumeInfo.imageLinks.smallThumbnail
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleBookChange = useCallback(debounce(getBooks, 300), [query]);
 
   useEffect(() => {
-    try {
-      onAuthStateChanged(FIREBASE_AUTH, (user) => {
-        if (user) {
-          // User is signed in, see docs for a list of available properties
-          // https://firebase.google.com/docs/reference/js/auth.user
-          const uid = user.uid;
-          console.log("UUUUUUIIIIIDDDDD", uid);
-          setUid(uid);
-          // ...
-        } else {
-          // User is signed out
-          // ...
-          console.log("USER IN NOT LOGGED IN");
-        }
-      });
-    } catch (error: any) {
-      console.log("bllop", error.code);
-    }
-  }, []);
+    if (query.length > 2) handleBookChange();
+    return () => handleBookChange.cancel();
+  }, [query, handleBookChange]);
+
+  const scrollY = new Animated.Value(0);
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [200, 50], // Image height reduces from 200 to 70
+    extrapolate: "clamp",
+  });
+
+  const imageHeight = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [150, 50], // Image height reduces from 150 to 50
+    extrapolate: "clamp",
+  });
+
+  const titleOpacity = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [1, 0], // Title fades out
+    extrapolate: "clamp",
+  });
+
+  const showContent = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+
+  console.log(Number(showContent) === 1, "coucou");
 
   return (
-    <View>
-      <Text>Browsing page</Text>
+    // <View style={styles.pageLayout}>
+    //   <Text>Browsing page</Text>
+    //   <TextInput
+    //     editable
+    //     placeholder="Search book..."
+    //     onChangeText={(text) => setQuery(text)}
+    //     value={query}
+    //     style={{
+    //       padding: 10,
+    //       borderWidth: 2,
+    //       borderColor: "lightgray",
+    //       borderRadius: 10,
+    //       marginBottom: 10,
+    //       fontSize: 18,
+    //       fontFamily: "Nunito-SemiBold",
+    //     }}
+    //   />
+
+    //   <View style={styles.booksDropdownStyle}>
+    //     <FlatList
+    //       contentContainerStyle={{ rowGap: 10 }}
+    //       data={booklist}
+    //       renderItem={({ item }: any) => (
+    //         <Pressable
+    //           onPress={() => navigation.navigate("BookDetails")}
+    //           key={item.id}
+    //           style={styles.bookSearch}
+    //         >
+    //           <Image
+    //             style={styles.thumbnail}
+    //             source={{
+    //               uri: item.volumeInfo.imageLinks.smallThumbnail,
+    //             }}
+    //           />
+    //           <View style={{ gap: 10, justifyContent: "center" }}>
+    //             {item.volumeInfo.subtitle && (
+    //               <Text>{item.volumeInfo.subtitle}</Text>
+    //             )}
+    //             <Text>{item.volumeInfo.title}</Text>
+    //             <Text>{item.volumeInfo.authors}</Text>
+    //             <View style={{ flexDirection: "row" }}>
+    //               <Text>{item.volumeInfo.publisher}</Text>
+    //               {item.volumeInfo.publisher &&
+    //                 item.volumeInfo.publishedDate && <Text> - </Text>}
+    //               {item.volumeInfo.publishedDate && (
+    //                 <Text>
+    //                   {new Date(item.volumeInfo.publishedDate).getFullYear()}
+    //                 </Text>
+    //               )}
+    //             </View>
+    //           </View>
+    //         </Pressable>
+    //       )}
+    //       keyExtractor={(item: any, index) => item.volumeInfo.title + index}
+    //     />
+    //   </View>
+    // </View>
+    // <View style={{ flex: 1, backgroundColor: "coral" }}>
+    //   <Animated.View style={{ height: headerHeight, backgroundColor: "pink" }}>
+    //     <Animated.Image
+    //       source={{
+    //         uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
+    //       }}
+    //       style={{ height: imageHeight, width: imageHeight }}
+    //     />
+    //     <Animated.Text style={{ opacity: titleOpacity }}>
+    //       Book Title
+    //     </Animated.Text>
+    //     <Animated.Text style={{ opacity: titleOpacity }}>
+    //       Author Name
+    //     </Animated.Text>
+    //   </Animated.View>
+    //   {Number(showContent) === 1 && <Text>coucou</Text>}
+
+    //   <Animated.ScrollView
+    //     contentContainerStyle={{ paddingTop: 50, backgroundColor: "lightblue" }} // Ensure there's space for the header
+    //     onScroll={Animated.event(
+    //       [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    //       { useNativeDriver: false }
+    //     )}
+    //     scrollEventThrottle={16}
+    //   >
+    //     {/* Second part of the content */}
+    //     <View>
+    //       <Text style={{ fontSize: 30 }}>
+    //         This is where the rest of the book details will go. The content here
+    //         will be scrollable and the header will shrink as you scroll. This is
+    //         where the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll. This is where
+    //         the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll. This is where
+    //         the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll. This is where
+    //         the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll. This is where
+    //         the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll. This is where
+    //         the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll. This is where
+    //         the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll. This is where
+    //         the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll. This is where
+    //         the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll. This is where
+    //         the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll. This is where
+    //         the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll. This is where
+    //         the rest of the book details will go. The content here will be
+    //         scrollable and the header will shrink as you scroll.
+    //       </Text>
+    //       {/* More content here */}
+    //     </View>
+    //   </Animated.ScrollView>
+    // </View>
+    <View style={styles.container}>
+      <View style={styles.shadowWrapper}>
+        <View style={styles.content}>
+          <Text>Content with Shadow on Top</Text>
+        </View>
+      </View>
     </View>
   );
 };
@@ -73,6 +258,59 @@ const Browse = ({ navigation }: IRouterProps) => {
 export default Browse;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+  },
+  shadowWrapper: {
+    elevation: 9, // Controls the shadow size
+    backgroundColor: "transparent",
+    position: "relative",
+  },
+  content: {
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+  },
+  bookSearch: {
+    backgroundColor: "white",
+    flexDirection: "row",
+    gap: 15,
+    borderRadius: 5,
+  },
+  booksContainer: {
+    // backgroundColor: "lightgray",
+    marginBottom: -10,
+    zIndex: 3,
+    maxHeight: 160,
+    paddingTop: 0,
+    height: 160,
+  },
+  thumbnail: {
+    height: 90,
+    width: 60,
+    borderRadius: 5,
+  },
+  booksDropdownContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-evenly",
+    rowGap: 10,
+    paddingBottom: 22,
+  },
+  booksDropdownStyle: {
+    backgroundColor: "lightgray",
+    paddingVertical: 10,
+    maxHeight: 400,
+    marginBottom: 10,
+    gap: 10,
+  },
   pageLayout: {
     backgroundColor: colors.light.background,
     paddingHorizontal: 20,
@@ -197,10 +435,6 @@ const styles = StyleSheet.create({
       pageLayout: {
         paddingHorizontal: 25,
         paddingVertical: 50,
-        display: "flex",
-        justifyContent: "space-between",
-        height: "100%",
-        flex: 1,
       },
     },
   }),

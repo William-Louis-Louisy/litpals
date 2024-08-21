@@ -20,7 +20,7 @@ import Config from "react-native-config";
 import { useAuth } from "../contexts/AuthContext";
 import { useUserContext } from "../contexts/UserContext";
 
-const Bookshelf = ({ navigation }: any) => {
+const InitialBookshelf = ({ navigation }: any) => {
   const [bookQuery, setBookQuery] = useState("");
   const [booksDrowpdown, setBooksDropdown] = useState([] as any);
   const [bookshelf, setBookshelf] = useState([] as any[]);
@@ -218,7 +218,7 @@ const Bookshelf = ({ navigation }: any) => {
   );
 };
 
-export default Bookshelf;
+export default InitialBookshelf;
 
 const styles = StyleSheet.create({
   modal: {

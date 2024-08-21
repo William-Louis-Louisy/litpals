@@ -7,6 +7,8 @@ import {
   TextInput,
   Platform,
   Button,
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import React, { useEffect, useState } from "react";
@@ -63,16 +65,337 @@ const LitPal = ({ navigation }: IRouterProps) => {
     }
   }, []);
 
+  const rating = 3.5;
+
   return (
-    <View>
-      <Text>LitPal page</Text>
-    </View>
+    <ScrollView contentContainerStyle={styles.pageLayout}>
+      <Text
+        style={{
+          fontSize: 26,
+          fontFamily: "Nunito-ExtraBold",
+          marginBottom: 20,
+        }}
+      >
+        Some page title
+      </Text>
+      <View style={{ gap: 30 }}>
+        <View style={{ gap: 10 }}>
+          <Text style={{ fontSize: 18, fontFamily: "Nunito-Bold" }}>
+            You're both currently reading Un Palais d'Épines et de Roses
+          </Text>
+          <View style={styles.userCard}>
+            <View
+              style={{
+                backgroundColor: "lightblue",
+                width: 60,
+                height: 60,
+                borderRadius: 50,
+                borderWidth: 2,
+              }}
+            ></View>
+            <Text style={{ fontFamily: "Nunito-ExtraBold" }}>Username401</Text>
+            <Pressable
+              style={{
+                backgroundColor: "#543757",
+                borderRadius: 50,
+                paddingVertical: 5,
+                paddingHorizontal: 8,
+                width: "100%",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "white", fontFamily: "Nunito-Bold" }}>
+                Chat now
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={{ gap: 10 }}>
+          <Text style={{ fontSize: 18, fontFamily: "Nunito-Bold" }}>
+            You both have Nevernight in your TBR
+          </Text>
+          <View style={styles.userCard}>
+            <View
+              style={{
+                backgroundColor: "lightblue",
+                width: 60,
+                height: 60,
+                borderRadius: 50,
+                borderWidth: 2,
+              }}
+            ></View>
+            <Text style={{ fontFamily: "Nunito-ExtraBold" }}>Username401</Text>
+            <Pressable
+              style={{
+                backgroundColor: "#543757",
+                borderRadius: 50,
+                paddingVertical: 5,
+                paddingHorizontal: 8,
+                width: "100%",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "white", fontFamily: "Nunito-Bold" }}>
+                Plan read
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={{ gap: 10 }}>
+          <Text style={{ fontSize: 18, fontFamily: "Nunito-Bold" }}>
+            Godkiller is a favorite for both of you
+          </Text>
+          <View style={styles.userCard}>
+            <View
+              style={{
+                backgroundColor: "lightblue",
+                width: 60,
+                height: 60,
+                borderRadius: 50,
+                borderWidth: 2,
+              }}
+            ></View>
+            <Text style={{ fontFamily: "Nunito-ExtraBold" }}>Username401</Text>
+            <Pressable
+              style={{
+                backgroundColor: "#543757",
+                borderRadius: 50,
+                paddingVertical: 5,
+                paddingHorizontal: 8,
+                width: "100%",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "white", fontFamily: "Nunito-Bold" }}>
+                View profile
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={{ gap: 10 }}>
+          <Text style={{ fontSize: 18, fontFamily: "Nunito-Bold" }}>
+            Reviews that might interest you
+          </Text>
+          <View style={styles.userCard2}>
+            <Pressable style={styles.book}>
+              <Image
+                style={styles.thumbnail}
+                source={{
+                  uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
+                }}
+              />
+            </Pressable>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "space-between",
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 5,
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: "lightblue",
+                    width: 30,
+                    height: 30,
+                    borderRadius: 50,
+                    borderWidth: 2,
+                  }}
+                ></View>
+                <Text style={{ fontFamily: "Nunito-ExtraBold" }}>
+                  Username401
+                </Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 2,
+                  justifyContent: "center",
+                }}
+              >
+                {[1, 2, 3, 4, 5].map((star) => {
+                  return (
+                    <Pressable key={star}>
+                      {star <= rating ? (
+                        <FontAwesome name="star" size={20} color="black" />
+                      ) : star <= rating + 0.5 ? (
+                        <FontAwesome
+                          name="star-half-full"
+                          size={20}
+                          color="black"
+                        />
+                      ) : (
+                        <FontAwesome name="star-o" size={20} color="blac  k" />
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <Pressable
+                style={{
+                  backgroundColor: "#543757",
+                  borderRadius: 50,
+                  paddingVertical: 5,
+                  paddingHorizontal: 8,
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "white", fontFamily: "Nunito-Bold" }}>
+                  Read review
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ gap: 10 }}>
+          <Text style={{ fontSize: 18, fontFamily: "Nunito-Bold" }}>
+            Challenges you may want to join
+          </Text>
+          <View style={styles.userCard2}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "space-between",
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 5,
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: "lightblue",
+                    width: 30,
+                    height: 30,
+                    borderRadius: 50,
+                    borderWidth: 2,
+                  }}
+                ></View>
+                <Text style={{ fontFamily: "Nunito-ExtraBold" }}>
+                  Username401
+                </Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                }}
+              >
+                <Pressable style={styles.book2}>
+                  <Image
+                    style={styles.thumbnail2}
+                    source={{
+                      uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
+                    }}
+                  />
+                </Pressable>
+                <Pressable style={styles.book2}>
+                  <Image
+                    style={styles.thumbnail2}
+                    source={{
+                      uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
+                    }}
+                  />
+                </Pressable>
+                <Pressable style={styles.book2}>
+                  <Image
+                    style={styles.thumbnail2}
+                    source={{
+                      uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
+                    }}
+                  />
+                </Pressable>
+              </View>
+              <Pressable
+                style={{
+                  backgroundColor: "#543757",
+                  borderRadius: 50,
+                  paddingVertical: 5,
+                  paddingHorizontal: 8,
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "white", fontFamily: "Nunito-Bold" }}>
+                  Join challenge
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ gap: 10 }}>
+          <Text style={{ fontSize: 18, fontFamily: "Nunito-Bold" }}>
+            Fantasy bookshelves you might enjoy
+          </Text>
+          <Pressable>
+            <Text>Explore bookshelf</Text>
+          </Pressable>
+        </View>
+
+        <View style={{ gap: 10 }}>
+          <Text style={{ fontSize: 18, fontFamily: "Nunito-Bold" }}>
+            Bookshelves featuring books by Sarah J. Maas
+          </Text>
+          <Pressable>
+            <Text>Explore bookshelf</Text>
+          </Pressable>
+        </View>
+      </View>
+    </ScrollView>
   );
 };
 
 export default LitPal;
 
 const styles = StyleSheet.create({
+  thumbnail2: {
+    height: 90,
+    width: 60,
+    borderRadius: 5,
+  },
+  book2: {
+    height: 90,
+    width: 60,
+  },
+  thumbnail: {
+    height: 120,
+    width: 80,
+    borderRadius: 5,
+  },
+  book: {
+    height: 120,
+    width: 80,
+  },
+  userCard2: {
+    backgroundColor: "#EFE6EF",
+    borderRadius: 5,
+    padding: 10,
+    width: ((Dimensions.get("window").width - 40) / 3) * 2,
+    gap: 10,
+    flexDirection: "row",
+  },
+  userCard: {
+    backgroundColor: "#EFE6EF",
+    borderRadius: 5,
+    padding: 10,
+    width: (Dimensions.get("window").width - 40) / 3,
+    alignItems: "center",
+    gap: 5,
+  },
   pageLayout: {
     backgroundColor: colors.light.background,
     paddingHorizontal: 20,
@@ -197,10 +520,7 @@ const styles = StyleSheet.create({
       pageLayout: {
         paddingHorizontal: 25,
         paddingVertical: 50,
-        display: "flex",
-        justifyContent: "space-between",
-        height: "100%",
-        flex: 1,
+        backgroundColor: "white",
       },
     },
   }),

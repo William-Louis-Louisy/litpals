@@ -4,59 +4,30 @@ import {
   Pressable,
   Image,
   StyleSheet,
-  TextInput,
   Platform,
-  ScrollView,
   FlatList,
   Dimensions,
 } from "react-native";
-import Checkbox from "expo-checkbox";
 import React, { useEffect, useState } from "react";
-import { Dropdown } from "react-native-element-dropdown";
-import { FontAwesome } from "@expo/vector-icons";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
-import { showToast } from "../utils/Toasts";
-import { NavigationProp, RouteProp } from "@react-navigation/native";
-import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import { useUserContext } from "../contexts/UserContext";
 import colors from "../constants/colors";
-import Config from "react-native-config";
-import Bookshelf from "../components/Bookshelf";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
-interface IRouterProps {
-  navigation: NavigationProp<any, any>;
-}
-
-const defaultUserInfo = {
-  gender: "",
-  country: "",
-  city: "",
-};
-
-const MyBookshelves = ({ navigation }: IRouterProps) => {
+const Bookshelf = ({ navigation, title }: any) => {
   const { state, dispatch } = useUserContext();
-  const [userInfo, setUserInfo] = useState(defaultUserInfo);
-  const [isLitMatchEnabled, setIsLitMatchEnabled] = useState(
-    state.personalInfo.litMatchEnabled
-  );
-  const { isLoggedIn, setIsLoggedIn, setIsSignedUp } = useAuth();
   const [uid, setUid] = useState("");
   const [books, setBooks] = useState([]);
   const [unfoldShelf, setUnfoldShelf] = useState(false);
-  const [shelves, setShelves] = useState([
-    "TBR",
-    "Wishlist",
-    "Favorites",
-    "Read",
-  ]);
+  const [shelves, setShelves] = useState([]);
 
-  // useEffect(() => {
-  //   console.log(books);
-  // }, [books]);
+  useEffect(() => {
+    console.log(books);
+  }, [books]);
 
   useEffect(() => {
     try {
@@ -79,114 +50,66 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   getBooks();
-  // }, []);
+  useEffect(() => {
+    getBooks();
+  }, []);
 
-  // const getBooks = async () => {
-  //   try {
-  //     const books = await axios.get("http://192.168.0.49:5000/books", {
-  //       params: { books: state.bookshelf },
-  //     });
-  //     if (books.data) setBooks(books.data.books);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+  const getBooks = async () => {
+    try {
+      const books = await axios.get("http://192.168.0.49:5000/books", {
+        params: { books: state.bookshelf },
+      });
+      if (books.data) setBooks(books.data.books);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  // useEffect(() => {
-  //   if (unfoldShelf) {
-  //     const bloop = [];
-  //     for (let i = 0; i < books.length; i += 3) {
-  //       console.log(books.slice(i, i + 3));
+  useEffect(() => {
+    if (unfoldShelf) {
+      const shelves = [];
+      for (let i = 0; i < books.length; i += 3) {
+        console.log(books.slice(i, i + 3));
 
-  //       bloop.push(books.slice(i, i + 3));
-  //     }
-  //     setShelves(bloop);
-  //   }
-  // }, [unfoldShelf]);
+        shelves.push(books.slice(i, i + 3));
+      }
+      setShelves(shelves);
+    }
+  }, [unfoldShelf]);
 
   return (
-    // <View style={styles.pageLayout}>
-    <ScrollView contentContainerStyle={styles.pageLayout}>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 20,
-        }}
-      >
+    <View style={styles.bookshelfBg}>
+      <View style={styles.shelfHeader}>
         <Text
           style={{
-            fontSize: 26,
-            fontFamily: "Nunito-ExtraBold",
+            fontSize: 22,
+            padding: 15,
+            paddingBottom: 0,
+            fontFamily: "Nunito-Bold",
           }}
         >
-          My Bookshelves
+          {title}
         </Text>
-        <Pressable style={{}}>
-          <FontAwesome5 name="plus" size={30} color="black" />
+        <Pressable style={{ marginRight: 15, padding: 5, paddingBottom: 3 }}>
+          <FontAwesome5 name="ellipsis-v" size={20} color="black" />
         </Pressable>
       </View>
-      {shelves.map((shelf) => {
-        return <Bookshelf navigation={navigation} title={shelf} />;
-      })}
-      {/* <View style={styles.bookshelfBg}>
-        <View style={styles.shelfHeader}>
-          <Text style={{ fontSize: 18, padding: 15 }}>All</Text>
-          <Pressable
-            onPress={() => setUnfoldShelf(!unfoldShelf)}
-            style={{ marginRight: 15 }}
-          >
-            <FontAwesome6 name="chevron-down" size={24} color="black" />
-          </Pressable>
-        </View>
-        {unfoldShelf ? (
-          shelves.map((shelf, index) => (
-            <React.Fragment key={index}>
-              <View style={styles.booksContainer}>
-                <FlatList
-                  horizontal={true}
-                  data={shelf}
-                  renderItem={({ item }) => (
-                    <Pressable style={styles.book}>
-                      <FontAwesome
-                        style={styles.deleteBook}
-                        name="times-circle"
-                        size={24}
-                        color="white"
-                      />
-                      <Image
-                        style={styles.thumbnail}
-                        source={{
-                          uri: item.thumbnail,
-                        }}
-                      />
-                    </Pressable>
-                  )}
-                  keyExtractor={(item) => item.title}
-                  scrollEnabled={false}
-                />
-              </View>
-              <View style={styles.bookshelf}></View>
-              <View style={styles.bookshelfThickness}></View>
-            </React.Fragment>
-          ))
-        ) : (
-          <>
+
+      {unfoldShelf ? (
+        shelves.map((shelf, index) => (
+          <React.Fragment key={index}>
             <View style={styles.booksContainer}>
               <FlatList
                 horizontal={true}
-                data={books}
+                data={shelf}
                 renderItem={({ item }) => (
                   <Pressable style={styles.book}>
-                    <FontAwesome
+                    {/* <FontAwesome
                       style={styles.deleteBook}
                       name="times-circle"
                       size={24}
                       color="white"
-                    />
+                    /> */}
                     <Image
                       style={styles.thumbnail}
                       source={{
@@ -196,23 +119,65 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
                   </Pressable>
                 )}
                 keyExtractor={(item) => item.title}
+                scrollEnabled={false}
               />
             </View>
             <View style={styles.bookshelf}></View>
             <View style={styles.bookshelfThickness}></View>
-          </>
-        )}
-      </View> */}
-    </ScrollView>
+          </React.Fragment>
+        ))
+      ) : (
+        <>
+          <View style={styles.booksContainer}>
+            <FlatList
+              horizontal={true}
+              data={books}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={styles.book}
+                  onPress={() => navigation.navigate("BookDetails")}
+                >
+                  {/* <FontAwesome
+                    style={styles.deleteBook}
+                    name="times-circle"
+                    size={24}
+                    color="white"
+                  /> */}
+                  <Image
+                    style={styles.thumbnail}
+                    source={{
+                      uri: item.thumbnail,
+                    }}
+                  />
+                </Pressable>
+              )}
+              keyExtractor={(item) => item.title}
+            />
+          </View>
+          <View style={styles.bookshelf}></View>
+          <View style={styles.bookshelfThickness}></View>
+        </>
+      )}
+      <Pressable
+        onPress={() => setUnfoldShelf(!unfoldShelf)}
+        style={{ alignSelf: "center", paddingVertical: 5 }}
+      >
+        <FontAwesome6
+          name={unfoldShelf ? "chevron-up" : "chevron-down"}
+          size={24}
+          color="black"
+        />
+      </Pressable>
+    </View>
   );
 };
 
-export default MyBookshelves;
+export default Bookshelf;
 
 const styles = StyleSheet.create({
   shelfHeader: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     justifyContent: "space-between",
   },
   deleteBook: {
@@ -275,7 +240,8 @@ const styles = StyleSheet.create({
   bookshelfBg: {
     backgroundColor: "rgba(255, 222, 173, .5)",
     borderRadius: 5,
-    paddingBottom: 30,
+    // paddingBottom: 30,
+    marginBottom: 20,
   },
   pageLayout: {
     backgroundColor: colors.light.background,
@@ -400,7 +366,11 @@ const styles = StyleSheet.create({
     android: {
       pageLayout: {
         paddingHorizontal: 25,
-        paddingTop: 50,
+        paddingVertical: 50,
+        display: "flex",
+        justifyContent: "space-between",
+        height: "100%",
+        flex: 1,
       },
     },
   }),

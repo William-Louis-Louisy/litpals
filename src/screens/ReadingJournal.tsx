@@ -25,6 +25,7 @@ import axios from "axios";
 import { useUserContext } from "../contexts/UserContext";
 import colors from "../constants/colors";
 import BookProgress from "../components/BookProgress";
+import Review from "../components/Review";
 
 interface IRouterProps {
   navigation: NavigationProp<any, any>;
@@ -492,7 +493,11 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
         </Modal>
 
         {/* REVIEW MODAL */}
-        <Modal
+        <Review
+          openReviewModal={openReviewModal}
+          setOpenReviewModal={setOpenReviewModal}
+        />
+        {/* <Modal
           animationType="slide"
           transparent={true}
           visible={openReviewModal}
@@ -562,7 +567,7 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
               </View>
             </View>
           </View>
-        </Modal>
+        </Modal> */}
       </ScrollView>
     </View>
   );

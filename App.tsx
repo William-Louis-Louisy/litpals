@@ -9,7 +9,7 @@ import MeetingProfile from "./src/screens/MeetingProfile";
 import ReadingProfile from "./src/screens/ReadingProfile2";
 import ReadingProfile2 from "./src/screens/ReadingProfile1";
 import Profile from "./src/screens/Profile";
-import Bookshelf from "./src/screens/Bookshelf";
+import Bookshelf from "./src/screens/InitialBookshelf";
 import Toast, { BaseToast } from "react-native-toast-message";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { FIREBASE_AUTH } from "./firebaseConfig";
@@ -40,6 +40,13 @@ export default function App() {
   );
 
   const toastConfig = { error: (props: any) => <CustomToast {...props} /> };
+
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      NavigationBar.setVisibilityAsync("hidden");
+      NavigationBar.setBehaviorAsync("inset-swipe");
+    }
+  }, []);
 
   // useEffect(() => {
   //   if (Platform.OS === "android") {
