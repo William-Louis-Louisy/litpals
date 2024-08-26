@@ -1,4 +1,10 @@
 const colors = {
+  lightCoral: "#e69c96ff",
+  blush: "#c76278ff",
+  marianBlue: "#484d8aff",
+  snow: "#fcf5f2ff",
+  sunset: "#fad298ff",
+  spaceCadet: "#171933ff",
   light: {
     background: "#FCF7F0",
     primary: "#F1CB50",

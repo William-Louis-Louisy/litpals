@@ -129,63 +129,63 @@ const Browse = ({ navigation }: IRouterProps) => {
   console.log(Number(showContent) === 1, "coucou");
 
   return (
-    // <View style={styles.pageLayout}>
-    //   <Text>Browsing page</Text>
-    //   <TextInput
-    //     editable
-    //     placeholder="Search book..."
-    //     onChangeText={(text) => setQuery(text)}
-    //     value={query}
-    //     style={{
-    //       padding: 10,
-    //       borderWidth: 2,
-    //       borderColor: "lightgray",
-    //       borderRadius: 10,
-    //       marginBottom: 10,
-    //       fontSize: 18,
-    //       fontFamily: "Nunito-SemiBold",
-    //     }}
-    //   />
+    <View style={styles.pageLayout}>
+      <Text>Browsing page</Text>
+      <TextInput
+        editable
+        placeholder="Search book..."
+        onChangeText={(text) => setQuery(text)}
+        value={query}
+        style={{
+          padding: 10,
+          borderWidth: 2,
+          borderColor: "lightgray",
+          borderRadius: 10,
+          marginBottom: 10,
+          fontSize: 18,
+          fontFamily: "Nunito-SemiBold",
+        }}
+      />
 
-    //   <View style={styles.booksDropdownStyle}>
-    //     <FlatList
-    //       contentContainerStyle={{ rowGap: 10 }}
-    //       data={booklist}
-    //       renderItem={({ item }: any) => (
-    //         <Pressable
-    //           onPress={() => navigation.navigate("BookDetails")}
-    //           key={item.id}
-    //           style={styles.bookSearch}
-    //         >
-    //           <Image
-    //             style={styles.thumbnail}
-    //             source={{
-    //               uri: item.volumeInfo.imageLinks.smallThumbnail,
-    //             }}
-    //           />
-    //           <View style={{ gap: 10, justifyContent: "center" }}>
-    //             {item.volumeInfo.subtitle && (
-    //               <Text>{item.volumeInfo.subtitle}</Text>
-    //             )}
-    //             <Text>{item.volumeInfo.title}</Text>
-    //             <Text>{item.volumeInfo.authors}</Text>
-    //             <View style={{ flexDirection: "row" }}>
-    //               <Text>{item.volumeInfo.publisher}</Text>
-    //               {item.volumeInfo.publisher &&
-    //                 item.volumeInfo.publishedDate && <Text> - </Text>}
-    //               {item.volumeInfo.publishedDate && (
-    //                 <Text>
-    //                   {new Date(item.volumeInfo.publishedDate).getFullYear()}
-    //                 </Text>
-    //               )}
-    //             </View>
-    //           </View>
-    //         </Pressable>
-    //       )}
-    //       keyExtractor={(item: any, index) => item.volumeInfo.title + index}
-    //     />
-    //   </View>
-    // </View>
+      <View style={styles.booksDropdownStyle}>
+        <FlatList
+          contentContainerStyle={{ rowGap: 10 }}
+          data={booklist}
+          renderItem={({ item }: any) => (
+            <Pressable
+              onPress={() => navigation.navigate("BookDetails")}
+              key={item.id}
+              style={styles.bookSearch}
+            >
+              <Image
+                style={styles.thumbnail}
+                source={{
+                  uri: item.volumeInfo.imageLinks.smallThumbnail,
+                }}
+              />
+              <View style={{ gap: 10, justifyContent: "center" }}>
+                {item.volumeInfo.subtitle && (
+                  <Text>{item.volumeInfo.subtitle}</Text>
+                )}
+                <Text>{item.volumeInfo.title}</Text>
+                <Text>{item.volumeInfo.authors}</Text>
+                <View style={{ flexDirection: "row" }}>
+                  <Text>{item.volumeInfo.publisher}</Text>
+                  {item.volumeInfo.publisher &&
+                    item.volumeInfo.publishedDate && <Text> - </Text>}
+                  {item.volumeInfo.publishedDate && (
+                    <Text>
+                      {new Date(item.volumeInfo.publishedDate).getFullYear()}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            </Pressable>
+          )}
+          keyExtractor={(item: any, index) => item.volumeInfo.title + index}
+        />
+      </View>
+    </View>
     // <View style={{ flex: 1, backgroundColor: "coral" }}>
     //   <Animated.View style={{ height: headerHeight, backgroundColor: "pink" }}>
     //     <Animated.Image
@@ -245,13 +245,6 @@ const Browse = ({ navigation }: IRouterProps) => {
     //     </View>
     //   </Animated.ScrollView>
     // </View>
-    <View style={styles.container}>
-      <View style={styles.shadowWrapper}>
-        <View style={styles.content}>
-          <Text>Content with Shadow on Top</Text>
-        </View>
-      </View>
-    </View>
   );
 };
 
