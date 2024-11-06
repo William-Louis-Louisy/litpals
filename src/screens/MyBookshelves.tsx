@@ -107,7 +107,6 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
   // }, [unfoldShelf]);
 
   return (
-    // <View style={styles.pageLayout}>
     <ScrollView contentContainerStyle={styles.pageLayout}>
       <View
         style={{

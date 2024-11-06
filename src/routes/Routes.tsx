@@ -21,6 +21,7 @@ import BookChallengeDuration from "../screens/BookChallengeDuration";
 import BookChallengeName from "../screens/BookChallengeName";
 import BookChallengeGoal from "../screens/BookChallengeGoal";
 import BookChallenge from "../screens/BookChallenge";
+import SignUpProcess from "../screens/SignUpProcess";
 
 const AuthStack = createNativeStackNavigator();
 
@@ -132,6 +133,11 @@ const Routes = () => {
   else if (isSignedUp)
     return (
       <SignUpStack.Navigator>
+        <SignUpStack.Screen
+          name="SignUpProcess"
+          component={SignUpProcess}
+          options={{ headerShown: false }}
+        />
         <SignUpStack.Screen
           name="PersonalInfo"
           component={PersonalInfo}

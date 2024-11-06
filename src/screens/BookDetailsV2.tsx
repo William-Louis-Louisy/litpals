@@ -8,40 +8,21 @@ import {
   FlatList,
   ScrollView,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
-import { NavigationProp, RouteProp } from "@react-navigation/native";
+import { NavigationProp } from "@react-navigation/native";
 import colors from "../constants/colors";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Octicons from "@expo/vector-icons/Octicons";
 
 interface IRouterProps {
   navigation: NavigationProp<any, any>;
-  route: RouteProp<
-    {
-      params: {
-        id: string;
-        title: string;
-        subtitle: string;
-        authors: string[];
-        publisher: string;
-        publishedDate: string;
-        pageCount: number;
-        language: string;
-        maturity: string;
-        description: string;
-        thumbnail: string;
-      };
-    },
-    "params"
-  >;
 }
 
-const BookDetails = ({ navigation, route }: IRouterProps) => {
+const BookDetailsV2 = ({ navigation }: IRouterProps) => {
   const [status, setStatus] = useState("");
   const [seeFullDesc, setSeeFullDesc] = useState(false);
-  const boook = route.params;
 
   return (
     <View style={styles.pageLayout}>
@@ -75,38 +56,10 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
         <View style={{ gap: 15 }}>
           {/* title */}
           <View>
-            <Text style={styles.mainTitle}>
-              {!boook.title.includes(" - ")
-                ? boook.title.replace(/\(*\s*e[\s-]*book\s*\)*\s*/gi, "").trim()
-                : boook.title
-                    .split(" - ")[0]
-                    .replace(/\(*\s*e[\s-]*book\s*\)*\s*/gi, "")
-                    .trim()}
+            <Text style={styles.mainTitle}>Un Palais d'Épines et de Roses</Text>
+            <Text style={[styles.title, styles.subtitle]}>
+              Un Palais d'Épines et de Roses #1
             </Text>
-            {boook.subtitle
-              ? // Only render if subtitle is non-empty after replacement
-                boook.subtitle
-                  .replace(/\(*\s*e[\s-]*book\s*\)*\s*/gi, "")
-                  .trim() && (
-                  <Text style={[styles.title, styles.subtitle]}>
-                    {boook.subtitle
-                      .replace(/\(*\s*e[\s-]*book\s*\)*\s*/gi, "")
-                      .trim()}
-                  </Text>
-                )
-              : // Check if processed title-based subtitle is non-empty
-                boook.title.includes(" - ") &&
-                boook.title
-                  .split(" - ")[1]
-                  .replace(/\(*\s*e[\s-]*book\s*\)*\s*/gi, "")
-                  .trim() && (
-                  <Text style={[styles.title, styles.subtitle]}>
-                    {boook.title
-                      .split(" - ")[1]
-                      .replace(/\(*\s*e[\s-]*book\s*\)*\s*/gi, "")
-                      .trim()}
-                  </Text>
-                )}
           </View>
 
           <View style={{ flexDirection: "row", gap: 20 }}>
@@ -116,7 +69,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
                 <Image
                   style={styles.thumbnail}
                   source={{
-                    uri: boook.thumbnail,
+                    uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
                   }}
                 />
               </Pressable>
@@ -139,25 +92,11 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
 
             {/* data */}
             <View style={{ flex: 1, gap: 10, justifyContent: "center" }}>
-              {/* <Text style={{ fontSize: 16, fontFamily: "Nunito-Bold" }}>
+              <Text style={{ fontSize: 16, fontFamily: "Nunito-Bold" }}>
                 Sarah J Maas
-              </Text> */}
-              {boook.authors.map((x) => (
-                <Text style={{ fontSize: 16, fontFamily: "Nunito-Bold" }}>
-                  {x}
-                </Text>
-              ))}
-              {/* <Text style={styles.text}>La Martinière | 2015</Text> */}
-              <Text style={styles.text}>
-                {boook.publisher} |{" "}
-                {new Date(boook.publishedDate).getFullYear()}
               </Text>
-              {/* <Text style={styles.text}>346 pages | 16+ | FR</Text> */}
-              <Text style={styles.text}>
-                {boook.pageCount} pages |{" "}
-                {boook.maturity !== "NOT_MATURE" && "16+ |"}{" "}
-                {boook.language?.toUpperCase()}
-              </Text>
+              <Text style={styles.text}>La Martinière | 2015</Text>
+              <Text style={styles.text}>346 pages | 16+ | FR</Text>
               {/* ratings */}
               <View
                 style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
@@ -194,7 +133,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
                   {/* <Text>(12k+ reviews)</Text> */}
                 </Pressable>
               </View>
-              {/* <Text style={styles.text}>Fantasy - Romance - YA</Text> */}
+              <Text style={styles.text}>Fantasy - Romance - YA</Text>
             </View>
           </View>
         </View>
@@ -212,9 +151,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Pressable
             style={styles.category}
-            onPress={() =>
-              status !== "wishlist" ? setStatus("wishlist") : setStatus("")
-            }
+            onPress={() => setStatus("wishlist")}
           >
             <View
               style={[
@@ -238,12 +175,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
               Wishlist
             </Text>
           </Pressable>
-          <Pressable
-            style={styles.category}
-            onPress={() =>
-              status !== "tbr" ? setStatus("tbr") : setStatus("")
-            }
-          >
+          <Pressable style={styles.category} onPress={() => setStatus("tbr")}>
             <View
               style={[
                 styles.categoryIcon,
@@ -267,9 +199,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
           </Pressable>
           <Pressable
             style={styles.category}
-            onPress={() =>
-              status !== "reading" ? setStatus("reading") : setStatus("")
-            }
+            onPress={() => setStatus("reading")}
           >
             <View
               style={[
@@ -293,12 +223,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
               Reading
             </Text>
           </Pressable>
-          <Pressable
-            style={styles.category}
-            onPress={() =>
-              status !== "read" ? setStatus("read") : setStatus("")
-            }
-          >
+          <Pressable style={styles.category} onPress={() => setStatus("read")}>
             <View
               style={[
                 styles.categoryIcon,
@@ -322,9 +247,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
           </Pressable>
           <Pressable
             style={styles.category}
-            onPress={() =>
-              status !== "favorites" ? setStatus("favorites") : setStatus("")
-            }
+            onPress={() => setStatus("favorites")}
           >
             <View
               style={[
@@ -351,7 +274,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
         </View>
 
         {/* tropes */}
-        {/* <View style={{ gap: 5 }}>
+        <View style={{ gap: 5 }}>
           <Text style={styles.title}>Tropes and themes</Text>
           <FlatList
             horizontal
@@ -366,10 +289,10 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
             renderItem={({ item }) => <Text style={styles.tag}>{item}</Text>}
             keyExtractor={(item) => item.toString()}
           />
-        </View> */}
+        </View>
 
         {/* original title */}
-        {/* <View style={{ marginTop: -6, gap: 5 }}>
+        <View style={{ marginTop: -6, gap: 5 }}>
           <Text style={styles.title}>Original title</Text>
           <View style={{ gap: 3 }}>
             <Text style={styles.text}>A Court of Mist and Fury</Text>
@@ -377,19 +300,29 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
               A Court of Thorns and Roses #1
             </Text>
           </View>
-        </View> */}
+        </View>
 
         {/* description */}
         <View style={{ gap: 5 }}>
           <Text style={styles.title}>Description</Text>
           <Pressable onPress={() => setSeeFullDesc(!seeFullDesc)}>
             <Text
-              // numberOfLines={seeFullDesc ? undefined : 4}
+              numberOfLines={seeFullDesc ? undefined : 4}
               style={[styles.text, { textAlign: "justify" }]}
             >
-              {boook.description}
+              En chassant dans les bois enneigés, Feyre voulait seulement
+              nourrir sa famille. Mais elle a commis l'irréparable en tuant un
+              Fae, et la voici emmenée de force à Prythian, royaume des
+              immortels. Là-bas, pourtant, sa prison est un palais magnifique et
+              son geôlier n'a rien d'un monstre. Tamlin, un Grand Seigneur Fae,
+              la traite comme une princesse. Et quel est ce mal qui ronge le
+              royaume et risque de s'étendre à celui des mortels ? A l'évidence,
+              Feyre n'est pas une simple prisonnière. Mais comment une jeune
+              humaine d'origine aussi modeste pourrait-elle venir en aide à de
+              si puissants seigneurs ? Sa liberté, en tout cas, semble être à ce
+              prix.
             </Text>
-            {/* <View
+            <View
               style={{
                 alignSelf: "center",
               }}
@@ -399,7 +332,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
               ) : (
                 <FontAwesome6 name="chevron-down" size={12} color="black" />
               )}
-            </View> */}
+            </View>
           </Pressable>
         </View>
 
@@ -420,7 +353,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
           </View>
         )}
 
-        {/* <View style={{ gap: 5 }}>
+        <View style={{ gap: 5 }}>
           <Text style={styles.title}>Other books from the same serie</Text>
           <FlatList
             horizontal
@@ -438,9 +371,9 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
             )}
             keyExtractor={(item) => item.toString()}
           />
-        </View> */}
+        </View>
 
-        {/* <View style={{ gap: 5 }}>
+        <View style={{ gap: 5 }}>
           <Text style={styles.title}>Other books from the same author</Text>
           <FlatList
             horizontal
@@ -458,13 +391,13 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
             )}
             keyExtractor={(item) => item.toString()}
           />
-        </View> */}
+        </View>
       </ScrollView>
     </View>
   );
 };
 
-export default BookDetails;
+export default BookDetailsV2;
 
 const styles = StyleSheet.create({
   mainTitle: { fontSize: 22, fontFamily: "Nunito-ExtraBold" },

@@ -8,7 +8,6 @@ import {
   Platform,
   Modal,
   ScrollView,
-  KeyboardAvoidingView,
   Dimensions,
   FlatList,
 } from "react-native";
@@ -19,6 +18,8 @@ import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { useAuth } from "../contexts/AuthContext";
 import { useUserContext } from "../contexts/UserContext";
 import Checkbox from "expo-checkbox";
+import colors from "../constants/colors";
+import BookChallengeGoal from "../screens/BookChallengeGoal";
 
 interface ReviewProps {
   openReviewModal: boolean;
@@ -32,11 +33,35 @@ const Review = ({ openReviewModal, setOpenReviewModal }: ReviewProps) => {
   const [notes, setNotes] = useState("");
   const [rating, setRating] = useState(0);
   const [openDropdown, setOpenDropdown] = useState(false);
-  const [tropes, setTropes] = useState<any>({ selected: [], created: [] });
-  const [createdTrope, setCreatedTrope] = useState("");
+  const [selectedTropes, setSelectedTropes] = useState<string[]>([]);
+  // const [createdTrope, setCreatedTrope] = useState("");
+  // const [createdTropesList, setCreatedTropesList] = useState<string[]>([]);
   const viewRef = useRef<View>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const [tropeInputPosition, setTropeInputPosition] = useState(0);
+  const [tropeSearch, setTropeSearch] = useState("");
+  const tropes = [
+    "Dark academia",
+    "Dragons",
+    "Enemies to lovers",
+    "Fae",
+    "Forced proximity",
+    "Found Family",
+    "Friends to lovers",
+    "He falls first",
+    "Pirates",
+    "Slow burn",
+    "Touch her and die",
+    "Vampires",
+    "Werewolves",
+  ];
+  const [allTropes, setAllTropes] = useState([...tropes]);
+
+  useEffect(() => {
+    if (tropeSearch.length > 0)
+      setAllTropes([...tropes].filter((x: string) => x.includes(tropeSearch)));
+    else setAllTropes([...tropes]);
+  }, [tropeSearch]);
 
   useEffect(() => {
     try {
@@ -64,13 +89,10 @@ const Review = ({ openReviewModal, setOpenReviewModal }: ReviewProps) => {
     else setRating(stars);
   };
 
-  const selectTropes = (trope: string, category: "selected" | "created") => {
-    if (tropes[category].includes(trope))
-      setTropes({
-        ...tropes,
-        [category]: tropes[category].filter((x: string) => x !== trope),
-      });
-    else setTropes({ ...tropes, [category]: [...tropes[category], trope] });
+  const selectTropes = (trope: string) => {
+    if (selectedTropes.includes(trope))
+      setSelectedTropes(selectedTropes.filter((x: string) => x !== trope));
+    else setSelectedTropes([...selectedTropes, trope]);
   };
 
   const scrollToView = () => {
@@ -89,158 +111,152 @@ const Review = ({ openReviewModal, setOpenReviewModal }: ReviewProps) => {
       visible={openReviewModal}
       onRequestClose={() => setOpenReviewModal(!openReviewModal)}
     >
-      {/* <View
-        style={styles.pageLayout}
-        // behavior={Platform.OS === "ios" ? "padding" : "height"}
-      > */}
-      <View style={styles.progressHeader}>
-        <Pressable
-          onPress={() => setOpenReviewModal(!openReviewModal)}
-          style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
-        >
-          <FontAwesome6 name="chevron-left" size={24} color="black" />
-          <Text style={{ fontFamily: "Nunito-Medium", fontSize: 15 }}>
-            Back
-          </Text>
-        </Pressable>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.modal} ref={scrollViewRef}>
-        {/* <View style={styles.modal}> */}
-        <View style={{ flexDirection: "row" }}>
-          <Pressable style={styles.book}>
-            <Image
-              style={styles.thumbnail}
-              source={{
-                uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
-              }}
-            />
+      <View style={{ flex: 1 }}>
+        {/* HEADER */}
+        <View style={styles.progressHeader}>
+          <Pressable
+            onPress={() => setOpenReviewModal(!openReviewModal)}
+            style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
+          >
+            <FontAwesome6 name="chevron-left" size={24} color="black" />
+            <Text style={{ fontFamily: "Nunito-Medium", fontSize: 15 }}>
+              Back
+            </Text>
           </Pressable>
-          <View>
-            <Text>Un Palais d'Épines et de Roses</Text>
-            <Text>Sarah J. Maas</Text>
-          </View>
         </View>
 
-        {/* STAR RATING */}
-        <View
-          style={{
-            flexDirection: "row",
-            gap: 10,
-            justifyContent: "center",
-            marginTop: 20,
-          }}
-        >
-          {[1, 2, 3, 4, 5].map((star) => {
-            return (
-              <Pressable key={star} onPress={() => handleRating(star)}>
-                {rating >= star ? (
-                  <FontAwesome name="star" size={35} color="black" />
-                ) : rating === star - 0.5 ? (
-                  <FontAwesome name="star-half-full" size={35} color="black" />
-                ) : (
-                  <FontAwesome name="star-o" size={35} color="blac  k" />
-                )}
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <View
-          onLayout={(e) => {
-            setTropeInputPosition(e.nativeEvent.layout.y);
-          }}
-          style={[
-            openDropdown && styles.full,
-            {
-              position: "relative",
-              backgroundColor: openDropdown ? "green" : "teal",
-            },
-          ]}
-        >
-          {!openDropdown && (
-            <Pressable
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingHorizontal: 10,
-                paddingVertical: 12,
-                borderWidth: 2,
-                borderColor: "lightgray",
-                borderRadius: 10,
-                justifyContent: "space-between",
-                position: "absolute",
-                width: "100%",
-              }}
-              onPress={() => {
-                setOpenDropdown(!openDropdown);
-                scrollToView();
-              }}
-            >
-              {tropes.length > 0 ? (
-                <Text>{tropes.length} selected</Text>
-              ) : (
-                <Text style={{ fontSize: 18, fontFamily: "Nunito-SemiBold" }}>
-                  Select tropes
-                </Text>
-              )}
-              <FontAwesome6 name="chevron-down" size={24} color="black" />
+        {/* CONTENT */}
+        <View style={styles.modal}>
+          <View style={{ flexDirection: "row" }}>
+            <Pressable style={styles.book}>
+              <Image
+                style={styles.thumbnail}
+                source={{
+                  uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
+                }}
+              />
             </Pressable>
-          )}
-          {openDropdown && (
+            <View>
+              <Text>Un Palais d'Épines et de Roses</Text>
+              <Text>Sarah J. Maas</Text>
+            </View>
+          </View>
+
+          {/* STAR RATING */}
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 10,
+              justifyContent: "center",
+              marginTop: 20,
+              marginBottom: 20,
+            }}
+          >
+            {[1, 2, 3, 4, 5].map((star) => {
+              return (
+                <Pressable key={star} onPress={() => handleRating(star)}>
+                  {rating >= star ? (
+                    <FontAwesome name="star" size={35} color="black" />
+                  ) : rating === star - 0.5 ? (
+                    <FontAwesome
+                      name="star-half-full"
+                      size={35}
+                      color="black"
+                    />
+                  ) : (
+                    <FontAwesome name="star-o" size={35} color="blac  k" />
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <View style={{ flex: 1 }}>
             <View
               style={{
-                position: "absolute",
-                width: "100%",
-                zIndex: 9,
+                height: "100%",
+                position: "relative",
               }}
-              ref={viewRef}
-              // onLayout={(e) => {
-              //   console.log(e.nativeEvent.layout.y);
-              //   setTropeInputPosition(e.nativeEvent.layout.y);
-              // }}
             >
+              {/* TROPES AND THEMES */}
               <View
                 style={{
                   flexDirection: "row",
-                  alignItems: "center",
+                  width: "100%",
                   justifyContent: "space-between",
+                  alignItems: "center",
                   borderWidth: 2,
                   borderColor: "lightgray",
                   borderRadius: 10,
                 }}
               >
-                <TextInput
-                  editable
-                  multiline={false}
-                  onChangeText={(text) => setNotes(text)}
-                  value={notes}
-                  placeholder="Search..."
-                  style={{
-                    padding: 10,
-                    fontSize: 18,
-                    fontFamily: "Nunito-SemiBold",
-                    flex: 1,
-                  }}
-                />
+                {openDropdown ? (
+                  <TextInput
+                    editable
+                    onChangeText={(text) => setTropeSearch(text)}
+                    value={tropeSearch}
+                    placeholder="Search..."
+                    style={{
+                      borderRadius: 10,
+                      paddingHorizontal: 10,
+                      paddingVertical: 8,
+                      fontSize: 16,
+                      fontFamily: "Nunito-SemiBold",
+                      textAlignVertical: "center",
+                      flex: 1,
+                    }}
+                  />
+                ) : (
+                  <Text
+                    style={{
+                      padding: 10,
+                      fontSize: 16,
+                      fontFamily: "Nunito-SemiBold",
+                      textAlignVertical: "center",
+                    }}
+                  >
+                    Select tropes and themes
+                  </Text>
+                )}
                 <Pressable
-                  onPress={() => setOpenDropdown(!openDropdown)}
-                  style={{ paddingHorizontal: 10 }}
+                  style={{
+                    paddingVertical: 10,
+                    paddingRight: 12,
+                    paddingLeft: 20,
+                  }}
+                  onPress={() => {
+                    setOpenDropdown(!openDropdown);
+                  }}
                 >
-                  <FontAwesome6 name="chevron-up" size={24} color="black" />
+                  <FontAwesome6
+                    name={`chevron-${openDropdown ? "up" : "down"}`}
+                    size={24}
+                    color="black"
+                  />
                 </Pressable>
               </View>
 
-              <View
-                style={{
-                  backgroundColor: "pink",
-                  padding: 10,
-                  // maxHeight: "50%",
-                }}
-              >
-                <ScrollView>
-                  {[1, 2, 3, 4, 5, 6].map((trope) => {
-                    return (
+              {openDropdown && (
+                <View
+                  style={{
+                    position: "absolute",
+                    width: "100%",
+                    zIndex: 9,
+                    top: "15%",
+                    maxHeight: "85%",
+                    backgroundColor: "lightgray",
+                    borderRadius: 10,
+                  }}
+                >
+                  <FlatList
+                    data={allTropes}
+                    contentContainerStyle={{
+                      zIndex: 9,
+                      padding: 10,
+                      rowGap: 5,
+                    }}
+                    keyExtractor={(item) => item}
+                    renderItem={({ item }) => (
                       <View
                         style={{
                           flexDirection: "row",
@@ -250,135 +266,66 @@ const Review = ({ openReviewModal, setOpenReviewModal }: ReviewProps) => {
                       >
                         <Checkbox
                           style={styles.checkbox}
-                          value={tropes.selected.includes(`Trope ${trope}`)}
-                          onValueChange={() =>
-                            selectTropes(`Trope ${trope}`, "selected")
-                          }
+                          value={selectedTropes.includes(item)}
+                          onValueChange={() => selectTropes(item)}
                           color={"orange"}
                         />
-                        <Text>Trope {trope}</Text>
+                        <Text>{item}</Text>
                       </View>
-                    );
-                  })}
-                </ScrollView>
-                <Text>Other:</Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    width: "100%",
-                  }}
-                >
-                  <TextInput
-                    style={{
-                      backgroundColor: "white",
-                      flex: 1,
-                      paddingHorizontal: 10,
-                      paddingVertical: 5,
-                    }}
-                    onChangeText={setCreatedTrope}
-                    value={createdTrope}
+                    )}
                   />
-                  <Pressable
-                    style={{
-                      backgroundColor: "lightblue",
-                      paddingHorizontal: 10,
-                      paddingVertical: 5,
-                    }}
-                    onPress={(e) => {
-                      setTropes({
-                        ...tropes,
-                        created: [...tropes.created, createdTrope],
-                      });
-                      setCreatedTrope("");
-                    }}
-                  >
-                    <Text>Add</Text>
-                  </Pressable>
                 </View>
-                {tropes.created.length > 0 && (
-                  <View>
-                    <Text
-                      style={{
-                        borderTopWidth: 2,
-                        marginTop: 10,
-                        paddingTop: 5,
-                      }}
-                    >
-                      Created:
-                    </Text>
-                    {tropes.created.map((trope: string) => (
-                      <Text>{trope}</Text>
-                    ))}
-                  </View>
-                )}
+              )}
 
-                {tropes.selected.length > 0 && (
-                  <View>
-                    <Text
-                      style={{
-                        borderTopWidth: 2,
-                        marginTop: 10,
-                        paddingTop: 5,
-                      }}
-                    >
-                      Selected:
-                    </Text>
-                    {tropes.selected.map((trope: string) => {
-                      return (
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            gap: 5,
-                            marginVertical: 5,
-                          }}
-                        >
-                          <Checkbox
-                            style={styles.checkbox}
-                            value={tropes.selected.includes(trope)}
-                            onValueChange={() =>
-                              selectTropes(trope, "selected")
-                            }
-                            color={"orange"}
-                          />
-                          <Text>{trope}</Text>
-                        </View>
-                      );
-                    })}
-                  </View>
+              <View style={{ marginTop: 5, paddingHorizontal: 2 }}>
+                {tropes.length > 0 && (
+                  <FlatList
+                    horizontal
+                    data={selectedTropes}
+                    contentContainerStyle={{
+                      columnGap: 5,
+                      marginBottom: 8,
+                    }}
+                    renderItem={({ item }) => (
+                      <Text style={styles.tag}>{item}</Text>
+                    )}
+                    keyExtractor={(item) => item.toString()}
+                  />
                 )}
               </View>
+
+              {/* REVIEW TEXT */}
+              <TextInput
+                editable
+                multiline
+                numberOfLines={8}
+                onChangeText={(text) => setNotes(text)}
+                value={notes}
+                placeholder="Write your review..."
+                style={{
+                  padding: 10,
+                  borderWidth: 2,
+                  borderColor: "lightgray",
+                  borderRadius: 10,
+                  marginBottom: 10,
+                  marginTop: 12,
+                  fontSize: 18,
+                  fontFamily: "Nunito-SemiBold",
+                  textAlignVertical: "top",
+                }}
+              />
             </View>
-          )}
+          </View>
 
-          <TextInput
-            editable
-            multiline
-            numberOfLines={8}
-            onChangeText={(text) => setNotes(text)}
-            value={notes}
-            style={{
-              padding: 10,
-              borderWidth: 2,
-              borderColor: "lightgray",
-              borderRadius: 10,
-              marginBottom: 10,
-              marginTop: 75,
-              fontSize: 18,
-              fontFamily: "Nunito-SemiBold",
-              textAlignVertical: "top",
-            }}
-          />
+          {/* SAVE BUTTON */}
+          <Pressable
+            style={styles.btnPrimary}
+            onPress={() => setOpenReviewModal(!openReviewModal)}
+          >
+            <Text style={styles.btnText}>Save review</Text>
+          </Pressable>
         </View>
-
-        {/* </View> */}
-      </ScrollView>
-      <Pressable
-        style={styles.btnPrimary}
-        onPress={() => setOpenReviewModal(!openReviewModal)}
-      >
-        <Text style={styles.btnText}>Save review</Text>
-      </Pressable>
-      {/* </View> */}
+      </View>
     </Modal>
   );
 };
@@ -386,11 +333,21 @@ const Review = ({ openReviewModal, setOpenReviewModal }: ReviewProps) => {
 export default Review;
 
 const styles = StyleSheet.create({
+  tag: {
+    borderWidth: 1,
+    borderColor: colors.light.secondary,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    borderRadius: 50,
+    color: colors.light.secondary,
+    textAlign: "center",
+    fontFamily: "Nunito-Medium",
+  },
   half: {
     maxHeight: "50%",
   },
   full: {
-    height: Dimensions.get("window").height * 0.75,
+    height: Dimensions.get("window").height * 0.5,
   },
   checkbox: {
     borderRadius: 100,
@@ -405,9 +362,8 @@ const styles = StyleSheet.create({
   },
   modal: {
     justifyContent: "space-between",
-    // height: "120%",
     paddingHorizontal: 25,
-    backgroundColor: "coral",
+    flex: 1,
   },
   thumbnail: {
     height: 180,

@@ -171,21 +171,7 @@ const Browse = ({ navigation }: IRouterProps) => {
           data={booklist}
           renderItem={({ item }: any) => (
             <Pressable
-              onPress={() =>
-                navigation.navigate("BookDetails", {
-                  id: item.id,
-                  title: item.volumeInfo.title,
-                  subtitle: item.volumeInfo.subtitle,
-                  authors: item.volumeInfo.authors,
-                  publisher: item.volumeInfo.publisher,
-                  publishedDate: item.volumeInfo.publishedDate,
-                  pageCount: item.volumeInfo.pageCount,
-                  language: item.volumeInfo.language,
-                  maturity: item.volumeInfo.maturityRating,
-                  description: item.volumeInfo.description,
-                  thumbnail: item.volumeInfo.imageLinks.smallThumbnail,
-                })
-              }
+              onPress={() => navigation.navigate("BookDetails")}
               key={item.id}
               style={styles.bookSearch}
             >

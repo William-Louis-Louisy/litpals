@@ -10,8 +10,6 @@ import {
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import React, { useEffect, useRef, useState } from "react";
-import { Dropdown } from "react-native-element-dropdown";
-import DatePicker from "react-native-date-picker";
 import axios from "axios";
 import Config from "react-native-config";
 import { useUserContext } from "../contexts/UserContext";
@@ -29,8 +27,9 @@ const defaultUserInfo = {
     year: "",
   },
   birthdatePrivate: false,
-  accountType: "reader",
-  litMatchEnabled: false,
+  bio: "",
+  // accountType: "reader",
+  // litMatchEnabled: false,
 };
 
 interface UserInfo {
@@ -46,6 +45,7 @@ const PersonalInfo = ({ navigation }: any) => {
   const [isBirthdatePrivate, setIsBirthdatePrivate] = useState(false);
   const [isLitMatchEnabled, setIsLitMatchEnabled] = useState(false);
   const [accountType, setAccountType] = useState("reader");
+  const [countryQuery, setCountryQuery] = useState("");
   const { dispatch } = useUserContext();
   const dayRef = useRef(null);
   const monthRef = useRef(null);
@@ -83,8 +83,10 @@ const PersonalInfo = ({ navigation }: any) => {
   };
 
   const navigateToNext = () => {
-    if (isLitMatchEnabled) navigation.navigate("MeetingProfile");
-    else navigation.navigate("ReadingProfile1");
+    // if (isLitMatchEnabled) navigation.navigate("MeetingProfile");
+    // else navigation.navigate("ReadingProfile1");
+
+    navigation.navigate("ReadingProfile1");
   };
 
   const validateUsername = async () => {
@@ -181,7 +183,7 @@ const PersonalInfo = ({ navigation }: any) => {
           autoCorrect={false}
         />
         <View style={styles.twoColContainer}>
-          <View>
+          <View style={styles.mb15}>
             <Text style={styles.label}>BIRTHDATE</Text>
             <View style={{ flexDirection: "row" }}>
               <TextInput
@@ -251,12 +253,56 @@ const PersonalInfo = ({ navigation }: any) => {
             <Text>Private</Text>
           </Pressable>
         </View>
-        <Text style={styles.mb15}>
+        {/* <Text style={styles.mb15}>
           Please note that if you enable LitMatch, your age will be displayed on
           your profile for compatibility purposes.
-        </Text>
+        </Text> */}
 
-        <Dropdown
+        <Text style={styles.label}>COUNTRY</Text>
+        <TextInput
+          style={[styles.input, styles.mb15]}
+          value={countryQuery}
+          placeholder={"Country"}
+          onChangeText={setCountryQuery}
+          // onChangeText={(e) => setUserInfo({ ...userInfo, country: e })}
+        />
+
+        <Text style={styles.label}>CITY</Text>
+        <TextInput
+          style={[styles.input, styles.mb15]}
+          value={userInfo.city}
+          placeholder={"City"}
+          onChangeText={(e) => setUserInfo({ ...userInfo, city: e })}
+        />
+
+        <Text style={styles.label}>BIO</Text>
+        <TextInput
+          editable
+          onChangeText={(text) =>
+            setUserInfo({
+              ...userInfo,
+              bio: text,
+            })
+          }
+          value={userInfo.bio}
+          placeholder="Tell us more about you..."
+          multiline
+          numberOfLines={6}
+          style={[
+            styles.input,
+            {
+              borderRadius: 10,
+              paddingHorizontal: 10,
+              paddingVertical: 8,
+              fontSize: 16,
+              fontFamily: "Nunito-SemiBold",
+              textAlignVertical: "top",
+            },
+          ]}
+        />
+
+        {/* account type dropdown */}
+        {/* <Dropdown
           data={accountTypes}
           labelField="label"
           valueField="value"
@@ -264,9 +310,10 @@ const PersonalInfo = ({ navigation }: any) => {
           onChange={(e) => setAccountType(e.value)}
           style={[styles.input, styles.mb15]}
           value={accountType}
-        />
+        /> */}
 
-        <Pressable
+        {/* enable litmatch btn */}
+        {/* <Pressable
           onPress={() => setIsLitMatchEnabled(!isLitMatchEnabled)}
           style={[
             styles.input,
@@ -289,7 +336,7 @@ const PersonalInfo = ({ navigation }: any) => {
             LitMatch is a feature that allow you to be matched with other book
             lovers and start a discussion.
           </Text>
-        </Pressable>
+        </Pressable> */}
       </View>
 
       <Pressable onPress={handleClick} style={styles.btnPrimary}>
@@ -325,15 +372,15 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: 5,
-    fontSize: 20,
+    fontSize: 16,
   },
   input: {
     borderWidth: 1,
     borderColor: "gray",
     paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingVertical: 5,
     borderRadius: 5,
-    fontSize: 20,
+    fontSize: 16,
   },
   halfWidth: {
     width: "50%",
