@@ -26,7 +26,7 @@ const SignIn = () => {
   const [userPwd, setUserPwd] = useState("");
   const auth = FIREBASE_AUTH;
   const { setIsLoggedIn, setIsSignedUp } = useAuth();
-  const { dispatch } = useUserContext();
+  const { state, dispatch } = useUserContext();
 
   const handleLogIn = async () => {
     try {
@@ -35,7 +35,16 @@ const SignIn = () => {
         userMail,
         userPwd
       );
-      if (userCredential) setIsLoggedIn(true);
+      if (userCredential) {
+        dispatch({
+          type: "UPDATE_FIELD",
+          payload: {
+            field: "uid",
+            value: userCredential.user.uid,
+          },
+        });
+        setIsLoggedIn(true);
+      }
     } catch (error: any) {
       if (error.code === "auth/invalid-credential")
         showToast({

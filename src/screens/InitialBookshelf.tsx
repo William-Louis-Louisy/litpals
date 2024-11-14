@@ -100,11 +100,6 @@ const InitialBookshelf = ({ navigation }: any) => {
     navigation.goBack();
   };
 
-  // const navigateToApp = () => {
-  //   setIsSignedUp(false);
-  //   setIsLoggedIn(true);
-  // };
-
   useEffect(() => {
     currentBookDetail.volumeInfo && toggleModal();
   }, [currentBookDetail]);

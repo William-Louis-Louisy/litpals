@@ -27,6 +27,7 @@ import { useUserContext } from "../contexts/UserContext";
 import colors from "../constants/colors";
 import { useFonts } from "expo-font";
 import ChallengeCard from "../components/ChallengeCard";
+import { IUserData } from "../interfaces/user.interface";
 
 interface IRouterProps {
   navigation: NavigationProp<any, any>;
@@ -40,22 +41,20 @@ const defaultUserInfo = {
 
 const Profile = ({ navigation }: IRouterProps) => {
   const { state, dispatch } = useUserContext();
-  const [userInfo, setUserInfo] = useState(defaultUserInfo);
-  const [isLitMatchEnabled, setIsLitMatchEnabled] = useState(
-    state.personalInfo.litMatchEnabled
-  );
   const { isLoggedIn, setIsLoggedIn, setIsSignedUp } = useAuth();
   const [uid, setUid] = useState("");
-  const [openChallengeBooklist, setOpenChallengeBooklist] = useState(false);
+  const [userInfo, setUserInfo] = useState<IUserData>();
 
   useEffect(() => {
+    console.log("HELLO????", state);
+
     try {
       onAuthStateChanged(FIREBASE_AUTH, (user) => {
         if (user) {
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/auth.user
           const uid = user.uid;
-          console.log("UUUUUUIIIIIDDDDD", uid);
+          // console.log("UUUUUUIIIIIDDDDD", uid);
           setUid(uid);
           // ...
         } else {
@@ -70,16 +69,24 @@ const Profile = ({ navigation }: IRouterProps) => {
   }, []);
 
   useEffect(() => {
-    console.log("isloged in", isLoggedIn);
-
-    if (isLoggedIn) getUserInfo();
+    getUserInfo();
   }, [uid]);
 
   const getUserInfo = async () => {
     try {
       const data = await axios.get(`http://192.168.0.49:5000/users/${uid}`);
-      console.log(data.data.user);
-      if (data) dispatch({ type: "SET_USER_DATA", payload: data.data.user });
+      // console.log(data.data.user);
+      // if (data) dispatch({ type: "SET_USER_DATA", payload: data.data.user });
+      if (data.status === 200) {
+        setUserInfo(data.data.user);
+        dispatch({
+          type: "UPDATE_FIELD",
+          payload: {
+            field: "bookshelf",
+            value: data.data.user.bookshelf,
+          },
+        });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -96,12 +103,29 @@ const Profile = ({ navigation }: IRouterProps) => {
     }
   };
 
-  const openReadingJournal = () => {
-    navigation.navigate("ReadingJournal");
-  };
+  // const openReadingJournal = () => {
+  //   navigation.navigate("ReadingJournal");
+  // };
 
   const openBookChallenge = () => {
     navigation.navigate("BookChallenge");
+  };
+
+  const getAge = () => {
+    const today = new Date();
+    const birthDate = new Date(
+      `${userInfo?.birthdate.year}-${userInfo?.birthdate.month}-${userInfo?.birthdate.day}`
+    );
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    const dayDifference = today.getDate() - birthDate.getDate();
+
+    if (monthDifference < 0 || (monthDifference === 0 && dayDifference < 0)) {
+      age--;
+    }
+
+    return age;
   };
 
   return (
@@ -109,27 +133,60 @@ const Profile = ({ navigation }: IRouterProps) => {
       <ScrollView contentContainerStyle={styles.pageLayout}>
         <View style={styles.profileHeader}>
           <View style={styles.imgContainer}>
-            {state.personalInfo.avatar ? (
+            {userInfo?.avatar ? (
               <Image
                 style={styles.avatar}
                 source={{
-                  uri: "data:image/jpeg;base64," + state.personalInfo.avatar,
+                  uri: "data:image/jpeg;base64," + userInfo?.avatar,
                 }}
               />
             ) : (
               <FontAwesome name="user-circle" size={100} color="black" />
             )}
           </View>
-          <Text>{state.personalInfo.username}</Text>
+          <Text>{userInfo?.username}</Text>
           <Text>
-            {state.personalInfo.birthdate.day}/
-            {state.personalInfo.birthdate.month}/
-            {state.personalInfo.birthdate.year}
+            {userInfo?.birthdate.day}/{userInfo?.birthdate.month}/
+            {userInfo?.birthdate.year}
           </Text>
-          <Text>{state.meetingInfo.city}, FR</Text>
+          <Text>
+            {getAge()} - {userInfo?.city}, FR
+          </Text>
         </View>
 
         <View style={[styles.card, styles.mb15, { gap: 20 }]}>
+          <Text style={styles.sectionTitle}>Current read</Text>
+          <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
+            <Pressable style={[styles.book, styles.shadow]}>
+              <Image
+                style={styles.thumbnail}
+                source={{
+                  uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
+                }}
+              />
+            </Pressable>
+            <View style={{ gap: 20, flex: 1 }}>
+              <View style={{ gap: 5 }}>
+                <Text style={{ fontSize: 20, fontFamily: "Nunito-Bold" }}>
+                  Un Palais d'Épines et de Roses
+                </Text>
+                <Text style={{ fontSize: 15, fontFamily: "Nunito-Medium" }}>
+                  Sarah J Maas
+                </Text>
+              </View>
+              <View style={{ gap: 5 }}>
+                <Text style={{ fontSize: 15, fontFamily: "Nunito-Medium" }}>
+                  Start date: 07/06/2024
+                </Text>
+                <Text style={{ fontSize: 15, fontFamily: "Nunito-Medium" }}>
+                  Progress: 263 (72%)
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* <View style={[styles.card, styles.mb15, { gap: 20 }]}>
           <Text style={styles.sectionTitle}>Current read</Text>
           <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
             <Pressable style={[styles.book, styles.shadow]}>
@@ -167,7 +224,7 @@ const Profile = ({ navigation }: IRouterProps) => {
               Open reading journal
             </Text>
           </Pressable>
-        </View>
+        </View> */}
 
         <View style={[styles.card, styles.mb15, { gap: 10 }]}>
           <Text style={styles.sectionTitle}>Reading challenges</Text>

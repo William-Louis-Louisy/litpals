@@ -1,24 +1,18 @@
-import {
-  View,
-  Text,
-  Pressable,
-  Image,
-  StyleSheet,
-  TextInput,
-  Platform,
-  Keyboard,
-} from "react-native";
-import Checkbox from "expo-checkbox";
-import React, { useRef, useState } from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useUserContext } from "../contexts/UserContext";
-import { showToast } from "../utils/Toasts";
-import * as ImagePicker from "expo-image-picker";
 import colors from "../constants/colors";
-import PersonalInfo from "./PersonalInfo";
 import PersonalInfo2 from "../components/PersonalInfo2";
+import { FontAwesome6 } from "@expo/vector-icons";
+import ReadingHabits from "../components/ReadingHabits";
+import ReadingPreferences from "../components/ReadingPreferences";
+import InitialBookshelf2 from "../components/InitialBookshelf2";
+import { useAuth } from "../contexts/AuthContext";
+import { useUserContext } from "../contexts/UserContext";
+import { IBookSample, IBookshelfData } from "../interfaces/bookshelf.interface";
 
 const defaultUserInfo = {
+  uid: "",
   avatar: "",
   username: "",
   birthdate: {
@@ -27,58 +21,139 @@ const defaultUserInfo = {
     year: "",
   },
   birthdatePrivate: false,
+  country: "",
+  city: "",
   bio: "",
+  readingHabits: {
+    bookTypes: [] as string[],
+    readingLanguages: "",
+    format: "",
+  },
+  readingPreferences: {
+    favoriteGenres: [] as string[],
+    favoriteTropes: [] as string[],
+    favoriteAuthors: [] as string[],
+  },
+  bookshelf: "",
 };
 
-interface UserInfo {
-  birthdate: {
-    day: string;
-    month: string;
-    year: string;
-  };
-}
+const defaultBookshelf = {
+  tbr: [] as IBookSample[],
+  wishlist: [] as IBookSample[],
+  reading: [] as IBookSample[],
+  read: [] as IBookSample[],
+  favorites: [] as IBookSample[],
+};
 
 const SignUpProcess = ({ navigation }: any) => {
+  const { state, dispatch } = useUserContext();
+  const { setIsSignedUp, setIsLoggedIn } = useAuth();
   const [step, setStep] = useState(1);
   const [userInfo, setUserInfo] = useState(defaultUserInfo);
-  const [isBirthdatePrivate, setIsBirthdatePrivate] = useState(false);
-  const [accountType, setAccountType] = useState("reader");
-  const { dispatch } = useUserContext();
-  const [selectedImage, setSelectedImage] = useState("");
-  const avatar = selectedImage
-    ? "data:image/jpeg;base64," + selectedImage
-    : "https://source.unsplash.com/random/?woman";
+  const [bookshelf, setBookshelf] = useState<IBookshelfData>(defaultBookshelf);
+
+  useEffect(() => {
+    setUserInfo({ ...userInfo, uid: state.uid });
+  }, []);
 
   const handleClick = async () => {
-    setStep(step + 1);
-    try {
-      dispatch({
-        type: "UPDATE_FIELD",
-        payload: {
-          field: "personalInfo",
-          value: {
-            ...userInfo,
-            avatar: selectedImage,
-            birthdatePrivate: isBirthdatePrivate,
-            accountType,
-          },
-        },
-      });
-      navigateToNext();
-    } catch (e) {
-      console.error(e);
-    }
+    if (step === 4) submitUserData();
+    else setStep(step + 1);
   };
 
-  const navigateToNext = () => {
-    navigation.navigate("ReadingProfile1");
+  const submitUserData = async () => {
+    try {
+      console.log("DATA COLLECTED", userInfo);
+
+      const data = await axios.post(`http://192.168.0.49:5000/users`, {
+        user: userInfo,
+        bookshelf: bookshelf,
+      });
+
+      if (data.data) console.log("hola que tal");
+
+      //   if (data.data) {
+      if (data.status === 201) {
+        dispatch({
+          type: "UPDATE_FIELD",
+          payload: {
+            field: "personalInfo",
+            value: {
+              avatar: userInfo.avatar,
+              username: userInfo.username,
+              birthdate: userInfo.birthdate,
+              birthdatePrivate: userInfo.birthdatePrivate,
+              country: userInfo.country,
+              city: userInfo.city,
+            },
+          },
+        });
+        console.log("wilkommen");
+
+        setIsSignedUp(false);
+        setIsLoggedIn(true);
+      }
+    } catch (error) {
+      console.error("Error submitting user data:", error);
+    }
   };
 
   return (
     <View style={styles.page}>
-      <PersonalInfo2 />
+      {/* PROGRESS HEADER */}
+      {step !== 1 && (
+        <View style={styles.progressHeader}>
+          <Pressable
+            onPress={() => setStep(step - 1)}
+            style={{
+              flexDirection: "row",
+              gap: 10,
+              alignItems: "center",
+            }}
+          >
+            <FontAwesome6
+              name="chevron-left"
+              size={24}
+              color={colors.light.secondary}
+            />
+            <Text
+              style={{
+                fontFamily: "Nunito-Medium",
+                fontSize: 15,
+                color: colors.light.secondary,
+              }}
+            >
+              Back
+            </Text>
+          </Pressable>
+          {step !== 4 && (
+            <Pressable
+              onPress={() => setStep(step + 1)}
+              style={styles.btnOutlineDiscreet}
+            >
+              <Text style={styles.btnOutlineDiscreetText}>Skip</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+
+      {/* CONTENT */}
+      {step === 1 && (
+        <PersonalInfo2 userInfo={userInfo} setUserInfo={setUserInfo} />
+      )}
+      {step === 2 && (
+        <ReadingHabits userInfo={userInfo} setUserInfo={setUserInfo} />
+      )}
+      {step === 3 && (
+        <ReadingPreferences userInfo={userInfo} setUserInfo={setUserInfo} />
+      )}
+      {step === 4 && (
+        <InitialBookshelf2 bookshelf={bookshelf} setBookshelf={setBookshelf} />
+      )}
+
+      {/* BUTTON */}
       <Pressable onPress={handleClick} style={styles.btnPrimary}>
-        <Text style={styles.btnText}>{step === 5 ? "Done" : "Next"}</Text>
+        <Text style={styles.btnText}>{step === 4 ? "Done" : "Next"}</Text>
       </Pressable>
     </View>
   );
@@ -87,9 +162,21 @@ const SignUpProcess = ({ navigation }: any) => {
 export default SignUpProcess;
 
 const styles = StyleSheet.create({
-  slash: {
-    fontSize: 20,
-    margin: 10,
+  progressHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+  },
+  btnOutlineDiscreet: {
+    borderWidth: 1,
+    borderColor: colors.light.secondary,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  btnOutlineDiscreetText: {
+    color: colors.light.secondary,
   },
   page: {
     paddingHorizontal: 20,
@@ -97,47 +184,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     height: "100%",
     flex: 1,
-    backgroundColor: colors.light.primary,
-  },
-  imgContainer: {
-    display: "flex",
-    alignItems: "center",
-  },
-  avatar: {
-    width: "40%",
-    aspectRatio: 1 / 1,
-    borderRadius: 200,
-  },
-  label: {
-    marginBottom: 5,
-    fontSize: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "gray",
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    borderRadius: 5,
-    fontSize: 16,
-  },
-  halfWidth: {
-    width: "50%",
-  },
-  checkboxContainer: {
-    // width: "50%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 10,
-  },
-  checkbox: {
-    borderRadius: 100,
-  },
-  twoColContainer: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 20,
+    backgroundColor: colors.light.background,
   },
   btnPrimary: {
     width: "100%",
@@ -152,30 +199,4 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 20,
   },
-  litMatchBtn: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  bgOrangeLight: {
-    backgroundColor: "rgba(255, 222, 173, .5)",
-  },
-  fs20: {
-    fontSize: 20,
-  },
-  mb15: {
-    marginBottom: 15,
-  },
-  ...Platform.select({
-    android: {
-      pageLayout: {
-        paddingHorizontal: 25,
-        paddingVertical: 50,
-        display: "flex",
-        justifyContent: "space-between",
-        height: "100%",
-        flex: 1,
-      },
-    },
-  }),
 });

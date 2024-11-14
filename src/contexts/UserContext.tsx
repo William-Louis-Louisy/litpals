@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, {
   createContext,
   useReducer,
@@ -6,7 +5,6 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import { useAuth } from "./AuthContext";
 
 interface IUserData {
   uid: string;
@@ -19,32 +17,24 @@ interface IUserData {
       year: string;
     };
     birthdatePrivate: boolean;
-    accountType: "reader" | "author" | "content-creator";
-    litMatchEnabled: boolean;
-  };
-  meetingInfo: {
-    gender: string;
     country: string;
     city: string;
-    litMatchPreferences: {
-      relationshipType: string;
-      communicationType: string;
-      genderPreference: string;
-    };
+    bio: string;
+    currentRead: [];
   };
-  readingInfo1: {
+  readingHabits: {
     bookTypes: string[];
     readingLanguages: string;
     format: string;
   };
-  readingInfo2: {
+  readingPreferences: {
     favoriteAuthors: string[];
     favoriteGenres: {
       fiction: string[];
       nonFiction: string[];
     };
   };
-  bookshelf: any[];
+  bookshelf: string;
 }
 
 const initialState: IUserData = {
@@ -58,32 +48,24 @@ const initialState: IUserData = {
       year: "",
     },
     birthdatePrivate: false,
-    accountType: "reader",
-    litMatchEnabled: false,
-  },
-  meetingInfo: {
-    gender: "",
     country: "",
     city: "",
-    litMatchPreferences: {
-      relationshipType: "",
-      communicationType: "",
-      genderPreference: "",
-    },
+    bio: "",
+    currentRead: [],
   },
-  readingInfo1: {
+  readingHabits: {
     bookTypes: [],
     readingLanguages: "",
     format: "",
   },
-  readingInfo2: {
+  readingPreferences: {
     favoriteAuthors: [],
     favoriteGenres: {
       fiction: [],
       nonFiction: [],
     },
   },
-  bookshelf: [],
+  bookshelf: "",
 };
 
 interface IUserProviderProps {
@@ -98,13 +80,11 @@ interface Action {
 interface UserContextType {
   state: IUserData;
   dispatch: React.Dispatch<Action>;
-  submitUserData: () => void;
 }
 
 const defaultContextValue: UserContextType = {
   state: initialState,
   dispatch: () => {},
-  submitUserData: () => {},
 };
 
 const UserContext = createContext<UserContextType>(defaultContextValue);
@@ -112,6 +92,8 @@ const UserContext = createContext<UserContextType>(defaultContextValue);
 function userReducer(state: IUserData, action: Action) {
   switch (action.type) {
     case "UPDATE_FIELD":
+      // if (action.payload.field === "uid") console.log("UIDDDDD");
+
       return { ...state, [action.payload.field]: action.payload.value };
     case "RESET":
       return initialState;
@@ -124,35 +106,10 @@ function userReducer(state: IUserData, action: Action) {
 
 export const UserProvider = ({ children }: IUserProviderProps) => {
   const [state, dispatch] = useReducer(userReducer, initialState);
-  const { isLoggedIn, setIsSignedUp, setIsLoggedIn } = useAuth();
-
-  const submitUserData = async () => {
-    try {
-      console.log("stoute", state);
-
-      const userData = state;
-      const data = await axios.post(`http://192.168.0.49:5000/users`, userData);
-
-      if (data.data) {
-        setIsSignedUp(false);
-        setIsLoggedIn(true);
-      }
-
-      // Set dataSubmitted to true after successful submission
-      //   setDataSubmitted(true);
-
-      dispatch({ type: "RESET" });
-    } catch (error) {
-      console.error("Error submitting user data:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (!isLoggedIn && state.personalInfo.username) submitUserData();
-  }, [state.bookshelf]);
+  // const { isLoggedIn, setIsSignedUp, setIsLoggedIn } = useAuth();
 
   return (
-    <UserContext.Provider value={{ state, dispatch, submitUserData }}>
+    <UserContext.Provider value={{ state, dispatch }}>
       {children}
     </UserContext.Provider>
   );

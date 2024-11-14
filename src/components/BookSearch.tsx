@@ -6,25 +6,22 @@ import {
   StyleSheet,
   TextInput,
   Platform,
-  Button,
-  ScrollView,
-  Dimensions,
   FlatList,
   Animated,
 } from "react-native";
-import Checkbox from "expo-checkbox";
-import React, { useCallback, useEffect, useState } from "react";
-import { Dropdown } from "react-native-element-dropdown";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { showToast } from "../utils/Toasts";
-import { NavigationProp, RouteProp } from "@react-navigation/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
-import { useUserContext } from "../contexts/UserContext";
 import colors from "../constants/colors";
 import Config from "react-native-config";
 import debounce from "lodash.debounce";
@@ -39,7 +36,20 @@ const defaultUserInfo = {
   city: "",
 };
 
-const Browse = ({ navigation }: IRouterProps) => {
+interface IProps {
+  origin: string;
+  setOpenBookSearch: Dispatch<SetStateAction<boolean>>;
+  selectedBooks: any[];
+  setSelectedBooks: Dispatch<SetStateAction<any[]>>;
+}
+
+const BookSearch = ({
+  origin,
+  setOpenBookSearch,
+  selectedBooks,
+  setSelectedBooks,
+}: IProps) => {
+  const navigation: any = useNavigation();
   const [query, setQuery] = useState("");
   const [booklist, setBooklist] = useState([]);
   const [currentBookDetail, setCurrentBookDetail] = useState({} as any);
@@ -78,8 +88,6 @@ const Browse = ({ navigation }: IRouterProps) => {
           },
         }
       );
-
-      console.log(response.data.items[0]);
 
       setBooklist(
         response.data.items.filter(
@@ -127,10 +135,29 @@ const Browse = ({ navigation }: IRouterProps) => {
     extrapolate: "clamp",
   });
 
-  console.log(Number(showContent) === 1, "coucou");
+  const handleSelectBook = (book: any) => {
+    // setSelectedBooks([...selectedBooks, book]);
+    setSelectedBooks([
+      ...selectedBooks,
+      { id: book.id, thumbnail: book.volumeInfo.imageLinks.smallThumbnail },
+    ]);
+  };
 
   return (
     <View style={styles.pageLayout}>
+      {/* PROGRESS HEADER */}
+      {origin === "signup" && (
+        <View style={styles.progressHeader}>
+          <Pressable onPress={() => setOpenBookSearch(false)}>
+            <FontAwesome6
+              name="chevron-left"
+              size={24}
+              color={colors.light.secondary}
+            />
+          </Pressable>
+        </View>
+      )}
+
       <View
         style={{
           flexDirection: "row",
@@ -171,7 +198,7 @@ const Browse = ({ navigation }: IRouterProps) => {
           data={booklist}
           renderItem={({ item }: any) => (
             <Pressable
-              onPress={() => navigation.navigate("BookDetails")}
+              onPress={() => handleSelectBook(item)}
               key={item.id}
               style={styles.bookSearch}
             >
@@ -204,71 +231,19 @@ const Browse = ({ navigation }: IRouterProps) => {
         />
       </View>
     </View>
-    // <View style={{ flex: 1, backgroundColor: "coral" }}>
-    //   <Animated.View style={{ height: headerHeight, backgroundColor: "pink" }}>
-    //     <Animated.Image
-    //       source={{
-    //         uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
-    //       }}
-    //       style={{ height: imageHeight, width: imageHeight }}
-    //     />
-    //     <Animated.Text style={{ opacity: titleOpacity }}>
-    //       Book Title
-    //     </Animated.Text>
-    //     <Animated.Text style={{ opacity: titleOpacity }}>
-    //       Author Name
-    //     </Animated.Text>
-    //   </Animated.View>
-    //   {Number(showContent) === 1 && <Text>coucou</Text>}
-
-    //   <Animated.ScrollView
-    //     contentContainerStyle={{ paddingTop: 50, backgroundColor: "lightblue" }} // Ensure there's space for the header
-    //     onScroll={Animated.event(
-    //       [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    //       { useNativeDriver: false }
-    //     )}
-    //     scrollEventThrottle={16}
-    //   >
-    //     {/* Second part of the content */}
-    //     <View>
-    //       <Text style={{ fontSize: 30 }}>
-    //         This is where the rest of the book details will go. The content here
-    //         will be scrollable and the header will shrink as you scroll. This is
-    //         where the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll.
-    //       </Text>
-    //       {/* More content here */}
-    //     </View>
-    //   </Animated.ScrollView>
-    // </View>
   );
 };
 
-export default Browse;
+export default BookSearch;
 
 const styles = StyleSheet.create({
+  progressHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
   deleteBook: {
     marginLeft: -30,
   },

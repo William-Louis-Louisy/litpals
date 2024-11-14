@@ -9,25 +9,12 @@ import {
   Keyboard,
 } from "react-native";
 import Checkbox from "expo-checkbox";
-import React, { useRef, useState } from "react";
+import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import axios from "axios";
 import { showToast } from "../utils/Toasts";
 import * as ImagePicker from "expo-image-picker";
 import colors from "../constants/colors";
-
-const defaultUserInfo = {
-  avatar: "",
-  username: "",
-  birthdate: {
-    day: "",
-    month: "",
-    year: "",
-  },
-  birthdatePrivate: false,
-  country: "",
-  city: "",
-  bio: "",
-};
+import { IUserData } from "../interfaces/user.interface";
 
 interface UserInfo {
   birthdate: {
@@ -37,14 +24,19 @@ interface UserInfo {
   };
 }
 
-const PersonalInfo = ({ navigation }: any) => {
-  const [userInfo, setUserInfo] = useState(defaultUserInfo);
-  const [isBirthdatePrivate, setIsBirthdatePrivate] = useState(false);
-  const [countryQuery, setCountryQuery] = useState("");
-  const dayRef = useRef(null);
-  const monthRef = useRef(null);
-  const yearRef = useRef(null);
-  const [selectedImage, setSelectedImage] = useState("");
+interface IProps {
+  userInfo: IUserData;
+  setUserInfo: Dispatch<SetStateAction<IUserData>>;
+}
+
+const PersonalInfo = ({ userInfo, setUserInfo }: IProps) => {
+  //   const [isBirthdatePrivate, setIsBirthdatePrivate] = useState(false);
+  const dayRef = useRef<TextInput | null>(null);
+  const monthRef = useRef<TextInput | null>(null);
+  const yearRef = useRef<TextInput | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null | undefined>(
+    ""
+  );
   const avatar = selectedImage
     ? "data:image/jpeg;base64," + selectedImage
     : "https://source.unsplash.com/random/?woman";
@@ -76,15 +68,15 @@ const PersonalInfo = ({ navigation }: any) => {
 
   const handleBackspace = (e: any, value: keyof UserInfo["birthdate"]) => {
     if (!userInfo.birthdate[value] && e.nativeEvent.key === "Backspace") {
-      if (value === "month") dayRef.current.focus();
-      else if (value === "year") monthRef.current.focus();
+      if (value === "month") dayRef.current?.focus();
+      else if (value === "year") monthRef.current?.focus();
     }
   };
 
   const handleBirthdateChange = (e: any, value: string) => {
     if ((value === "day" || value === "month") && e.length === 2) {
       if (value === "day" && monthRef.current) monthRef.current.focus();
-      else if (value === "month") yearRef.current.focus();
+      else if (value === "month") yearRef.current?.focus();
     } else if (value === "year" && e.length === 4) Keyboard.dismiss();
   };
 
@@ -200,13 +192,23 @@ const PersonalInfo = ({ navigation }: any) => {
           </View>
         </View>
         <Pressable
-          onPress={() => setIsBirthdatePrivate(!isBirthdatePrivate)}
+          onPress={() =>
+            setUserInfo({
+              ...userInfo,
+              birthdatePrivate: !userInfo.birthdatePrivate,
+            })
+          }
           style={styles.checkboxContainer}
         >
           <Checkbox
             style={styles.checkbox}
-            value={isBirthdatePrivate}
-            onValueChange={setIsBirthdatePrivate}
+            value={userInfo.birthdatePrivate}
+            onValueChange={() =>
+              setUserInfo({
+                ...userInfo,
+                birthdatePrivate: !userInfo.birthdatePrivate,
+              })
+            }
             color={"orange"}
           />
           <Text>Private</Text>
@@ -216,9 +218,9 @@ const PersonalInfo = ({ navigation }: any) => {
       <Text style={styles.label}>COUNTRY</Text>
       <TextInput
         style={[styles.input, styles.mb15]}
-        value={countryQuery}
+        value={userInfo.country}
         placeholder={"Country"}
-        onChangeText={setCountryQuery}
+        onChangeText={(e) => setUserInfo({ ...userInfo, country: e })}
       />
 
       <Text style={styles.label}>CITY</Text>

@@ -40,9 +40,6 @@ const defaultUserInfo = {
 const MyBookshelves = ({ navigation }: IRouterProps) => {
   const { state, dispatch } = useUserContext();
   const [userInfo, setUserInfo] = useState(defaultUserInfo);
-  const [isLitMatchEnabled, setIsLitMatchEnabled] = useState(
-    state.personalInfo.litMatchEnabled
-  );
   const { isLoggedIn, setIsLoggedIn, setIsSignedUp } = useAuth();
   const [uid, setUid] = useState("");
   const [books, setBooks] = useState([]);
@@ -60,24 +57,38 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
 
   useEffect(() => {
     try {
-      onAuthStateChanged(FIREBASE_AUTH, (user) => {
-        if (user) {
-          // User is signed in, see docs for a list of available properties
-          // https://firebase.google.com/docs/reference/js/auth.user
-          const uid = user.uid;
-          console.log("UUUUUUIIIIIDDDDD", uid);
-          setUid(uid);
-          // ...
-        } else {
-          // User is signed out
-          // ...
-          console.log("USER IN NOT LOGGED IN");
-        }
-      });
+      console.log("BOOKSHELVES INIT", state.bookshelf);
+      getBookshelf();
+
+      // onAuthStateChanged(FIREBASE_AUTH, (user) => {
+      //   if (user) {
+      //     // User is signed in, see docs for a list of available properties
+      //     // https://firebase.google.com/docs/reference/js/auth.user
+      //     const uid = user.uid;
+      //     console.log("UUUUUUIIIIIDDDDD", uid);
+      //     setUid(uid);
+      //     // ...
+      //   } else {
+      //     // User is signed out
+      //     // ...
+      //     console.log("USER IN NOT LOGGED IN");
+      //   }
+      // });
     } catch (error: any) {
       console.log("bllop", error.code);
     }
   }, []);
+
+  const getBookshelf = async () => {
+    try {
+      const bookshelf = await axios.get(
+        `http://192.168.0.49:5000/bookshelves/${state.bookshelf}`
+      );
+      if (bookshelf.data) console.log("got bookshel", bookshelf.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // useEffect(() => {
   //   getBooks();

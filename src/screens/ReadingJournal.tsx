@@ -60,7 +60,7 @@ const ReadingJournal = ({ navigation }: IRouterProps) => {
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/auth.user
           const uid = user.uid;
-          console.log("UUUUUUIIIIIDDDDD", uid);
+          // console.log("UUUUUUIIIIIDDDDD", uid);
           setUid(uid);
           // ...
         } else {
