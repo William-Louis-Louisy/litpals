@@ -15,6 +15,8 @@ import { NavigationProp, RouteProp } from "@react-navigation/native";
 import colors from "../constants/colors";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Octicons from "@expo/vector-icons/Octicons";
+import axios from "axios";
+import { useUserContext } from "../contexts/UserContext";
 
 interface IRouterProps {
   navigation: NavigationProp<any, any>;
@@ -32,6 +34,7 @@ interface IRouterProps {
         maturity: string;
         description: string;
         thumbnail: string;
+        shelf: string;
       };
     },
     "params"
@@ -39,9 +42,30 @@ interface IRouterProps {
 }
 
 const BookDetails = ({ navigation, route }: IRouterProps) => {
-  const [status, setStatus] = useState("");
-  const [seeFullDesc, setSeeFullDesc] = useState(false);
   const boook = route.params;
+  const [status, setStatus] = useState(boook.shelf);
+  const [seeFullDesc, setSeeFullDesc] = useState(false);
+  const { state } = useUserContext();
+
+  const selectStatus = async (selectedStatus: string) => {
+    status !== selectedStatus ? setStatus(selectedStatus) : setStatus("");
+    try {
+      const bookshelfUpdate = await axios.patch(
+        `http://192.168.0.49:5000/bookshelf/${state.bookshelf}`,
+        {
+          previousShelf: boook.shelf,
+          shelf: selectedStatus,
+          bookId: boook.id,
+          thumbnail: boook.thumbnail,
+        }
+      );
+
+      if (bookshelfUpdate.data)
+        console.log("bookshelfUpdate.data", bookshelfUpdate.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <View style={styles.pageLayout}>
@@ -212,9 +236,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Pressable
             style={styles.category}
-            onPress={() =>
-              status !== "wishlist" ? setStatus("wishlist") : setStatus("")
-            }
+            onPress={() => selectStatus("wishlist")}
           >
             <View
               style={[
@@ -240,9 +262,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
           </Pressable>
           <Pressable
             style={styles.category}
-            onPress={() =>
-              status !== "tbr" ? setStatus("tbr") : setStatus("")
-            }
+            onPress={() => selectStatus("tbr")}
           >
             <View
               style={[
@@ -267,9 +287,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
           </Pressable>
           <Pressable
             style={styles.category}
-            onPress={() =>
-              status !== "reading" ? setStatus("reading") : setStatus("")
-            }
+            onPress={() => selectStatus("reading")}
           >
             <View
               style={[
@@ -295,9 +313,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
           </Pressable>
           <Pressable
             style={styles.category}
-            onPress={() =>
-              status !== "read" ? setStatus("read") : setStatus("")
-            }
+            onPress={() => selectStatus("read")}
           >
             <View
               style={[
@@ -322,9 +338,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
           </Pressable>
           <Pressable
             style={styles.category}
-            onPress={() =>
-              status !== "favorites" ? setStatus("favorites") : setStatus("")
-            }
+            onPress={() => selectStatus("favorites")}
           >
             <View
               style={[

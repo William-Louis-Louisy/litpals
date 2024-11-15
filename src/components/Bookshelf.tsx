@@ -8,7 +8,7 @@ import {
   FlatList,
   Dimensions,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { onAuthStateChanged } from "firebase/auth";
@@ -17,65 +17,85 @@ import axios from "axios";
 import { useUserContext } from "../contexts/UserContext";
 import colors from "../constants/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { IBookSample } from "../interfaces/bookshelf.interface";
+import { capitalize } from "../utils/Helpers";
 
-const Bookshelf = ({ navigation, title }: any) => {
+const Bookshelf = ({ navigation, shelfName, books, key }: any) => {
   const { state, dispatch } = useUserContext();
   const [uid, setUid] = useState("");
-  const [books, setBooks] = useState([]);
+  // const [books, setBooks] = useState([]);
   const [unfoldShelf, setUnfoldShelf] = useState(false);
-  const [shelves, setShelves] = useState([]);
+  const [shelves, setShelves] = useState([] as any[]);
 
-  useEffect(() => {
-    console.log(books);
-  }, [books]);
+  // useEffect(() => {
+  //   try {
+  //     onAuthStateChanged(FIREBASE_AUTH, (user) => {
+  //       if (user) {
+  //         // User is signed in, see docs for a list of available properties
+  //         // https://firebase.google.com/docs/reference/js/auth.user
+  //         const uid = user.uid;
+  //         // console.log("UUUUUUIIIIIDDDDD", uid);
+  //         setUid(uid);
+  //         // ...
+  //       } else {
+  //         // User is signed out
+  //         // ...
+  //         console.log("USER IN NOT LOGGED IN");
+  //       }
+  //     });
+  //   } catch (error: any) {
+  //     console.log("bllop", error.code);
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    try {
-      onAuthStateChanged(FIREBASE_AUTH, (user) => {
-        if (user) {
-          // User is signed in, see docs for a list of available properties
-          // https://firebase.google.com/docs/reference/js/auth.user
-          const uid = user.uid;
-          // console.log("UUUUUUIIIIIDDDDD", uid);
-          setUid(uid);
-          // ...
-        } else {
-          // User is signed out
-          // ...
-          console.log("USER IN NOT LOGGED IN");
-        }
-      });
-    } catch (error: any) {
-      console.log("bllop", error.code);
-    }
-  }, []);
+  // useEffect(() => {
+  //   getBooks();
+  // }, []);
 
-  useEffect(() => {
-    getBooks();
-  }, []);
-
-  const getBooks = async () => {
-    try {
-      const books = await axios.get("http://192.168.0.49:5000/books", {
-        params: { books: state.bookshelf },
-      });
-      if (books.data) setBooks(books.data.books);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const getBooks = async () => {
+  //   try {
+  //     const books = await axios.get("http://192.168.0.49:5000/books", {
+  //       params: { books: state.bookshelf },
+  //     });
+  //     if (books.data) setBooks(books.data.books);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   useEffect(() => {
     if (unfoldShelf) {
-      const shelves = [];
+      const bookshelves = [];
       for (let i = 0; i < books.length; i += 3) {
         console.log(books.slice(i, i + 3));
 
-        shelves.push(books.slice(i, i + 3));
+        bookshelves.push(books.slice(i, i + 3));
       }
-      setShelves(shelves);
+      setShelves(bookshelves);
     }
   }, [unfoldShelf]);
+
+  const handleSelectedBook = async (bookId: string) => {
+    const book = await axios.get(
+      `https://www.googleapis.com/books/v1/volumes/${bookId}`
+    );
+    console.log("book data", book.data.id, book.data.volumeInfo.title);
+
+    navigation.navigate("BookDetails", {
+      id: book.data.id,
+      title: book.data.volumeInfo.title,
+      subtitle: book.data.volumeInfo.subtitle,
+      authors: book.data.volumeInfo.authors,
+      publisher: book.data.volumeInfo.publisher,
+      publishedDate: book.data.volumeInfo.publishedDate,
+      pageCount: book.data.volumeInfo.pageCount,
+      language: book.data.volumeInfo.language,
+      maturity: book.data.volumeInfo.maturityRating,
+      description: book.data.volumeInfo.description,
+      thumbnail: book.data.volumeInfo.imageLinks.smallThumbnail,
+      shelf: shelfName,
+    });
+  };
 
   return (
     <View style={styles.bookshelfBg}>
@@ -88,7 +108,9 @@ const Bookshelf = ({ navigation, title }: any) => {
             fontFamily: "Nunito-Bold",
           }}
         >
-          {title}
+          {shelfName === "tbr"
+            ? shelfName.toUpperCase()
+            : capitalize(shelfName)}
         </Text>
         <Pressable style={{ marginRight: 15, padding: 5, paddingBottom: 3 }}>
           <FontAwesome5 name="ellipsis-v" size={20} color="black" />
@@ -97,7 +119,7 @@ const Bookshelf = ({ navigation, title }: any) => {
 
       {unfoldShelf ? (
         shelves.map((shelf, index) => (
-          <React.Fragment key={index}>
+          <Fragment key={index}>
             <View style={styles.booksContainer}>
               <FlatList
                 horizontal={true}
@@ -124,7 +146,7 @@ const Bookshelf = ({ navigation, title }: any) => {
             </View>
             <View style={styles.bookshelf}></View>
             <View style={styles.bookshelfThickness}></View>
-          </React.Fragment>
+          </Fragment>
         ))
       ) : (
         <>
@@ -135,7 +157,7 @@ const Bookshelf = ({ navigation, title }: any) => {
               renderItem={({ item }) => (
                 <Pressable
                   style={styles.book}
-                  onPress={() => navigation.navigate("BookDetails")}
+                  onPress={() => handleSelectedBook(item.id)}
                 >
                   {/* <FontAwesome
                     style={styles.deleteBook}

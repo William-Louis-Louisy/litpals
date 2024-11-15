@@ -11,7 +11,7 @@ import {
   Dimensions,
 } from "react-native";
 import Checkbox from "expo-checkbox";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Dropdown } from "react-native-element-dropdown";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -19,7 +19,11 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { showToast } from "../utils/Toasts";
-import { NavigationProp, RouteProp } from "@react-navigation/native";
+import {
+  NavigationProp,
+  RouteProp,
+  useFocusEffect,
+} from "@react-navigation/native";
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import { useUserContext } from "../contexts/UserContext";
@@ -44,47 +48,30 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
   const [uid, setUid] = useState("");
   const [books, setBooks] = useState([]);
   const [unfoldShelf, setUnfoldShelf] = useState(false);
-  const [shelves, setShelves] = useState([
-    "TBR",
-    "Wishlist",
-    "Favorites",
-    "Read",
-  ]);
+  const [shelves, setShelves] = useState({
+    tbr: [],
+    wishlist: [],
+    reading: [],
+    read: [],
+    favorites: [],
+  });
 
-  // useEffect(() => {
-  //   console.log(books);
-  // }, [books]);
-
-  useEffect(() => {
-    try {
+  useFocusEffect(
+    useCallback(() => {
       console.log("BOOKSHELVES INIT", state.bookshelf);
       getBookshelf();
-
-      // onAuthStateChanged(FIREBASE_AUTH, (user) => {
-      //   if (user) {
-      //     // User is signed in, see docs for a list of available properties
-      //     // https://firebase.google.com/docs/reference/js/auth.user
-      //     const uid = user.uid;
-      //     console.log("UUUUUUIIIIIDDDDD", uid);
-      //     setUid(uid);
-      //     // ...
-      //   } else {
-      //     // User is signed out
-      //     // ...
-      //     console.log("USER IN NOT LOGGED IN");
-      //   }
-      // });
-    } catch (error: any) {
-      console.log("bllop", error.code);
-    }
-  }, []);
+    }, [])
+  );
 
   const getBookshelf = async () => {
     try {
       const bookshelf = await axios.get(
-        `http://192.168.0.49:5000/bookshelves/${state.bookshelf}`
+        `http://192.168.0.49:5000/bookshelf/${state.bookshelf}`
       );
-      if (bookshelf.data) console.log("got bookshel", bookshelf.data);
+      if (bookshelf.data) {
+        console.log("got bookshel", bookshelf.data);
+        setShelves(bookshelf.data.bookshelf);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -139,9 +126,17 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
           <FontAwesome5 name="plus" size={30} color="black" />
         </Pressable>
       </View>
-      {shelves.map((shelf) => {
+      {/* {shelves.map((shelf) => {
         return <Bookshelf navigation={navigation} title={shelf} />;
-      })}
+      })} */}
+      {Object.entries(shelves).map(([shelfName, books]) => (
+        <Bookshelf
+          key={shelfName}
+          shelfName={shelfName}
+          books={books}
+          navigation={navigation}
+        />
+      ))}
       {/* <View style={styles.bookshelfBg}>
         <View style={styles.shelfHeader}>
           <Text style={{ fontSize: 18, padding: 15 }}>All</Text>
