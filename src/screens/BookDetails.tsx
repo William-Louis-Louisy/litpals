@@ -49,6 +49,9 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
 
   const selectStatus = async (selectedStatus: string) => {
     status !== selectedStatus ? setStatus(selectedStatus) : setStatus("");
+
+    console.log(boook.shelf, selectedStatus, status);
+
     try {
       const bookshelfUpdate = await axios.patch(
         `http://192.168.0.49:5000/bookshelf/${state.bookshelf}`,
@@ -60,8 +63,7 @@ const BookDetails = ({ navigation, route }: IRouterProps) => {
         }
       );
 
-      if (bookshelfUpdate.data)
-        console.log("bookshelfUpdate.data", bookshelfUpdate.data);
+      if (bookshelfUpdate.data) console.log("bookshelfUpdate okay");
     } catch (error) {
       console.log(error);
     }

@@ -20,7 +20,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { IBookSample } from "../interfaces/bookshelf.interface";
 import { capitalize } from "../utils/Helpers";
 
-const Bookshelf = ({ navigation, shelfName, books, key }: any) => {
+const Bookshelf = ({ navigation, shelfName, books }: any) => {
   const { state, dispatch } = useUserContext();
   const [uid, setUid] = useState("");
   // const [books, setBooks] = useState([]);
@@ -180,16 +180,18 @@ const Bookshelf = ({ navigation, shelfName, books, key }: any) => {
           <View style={styles.bookshelfThickness}></View>
         </>
       )}
-      <Pressable
-        onPress={() => setUnfoldShelf(!unfoldShelf)}
-        style={{ alignSelf: "center", paddingVertical: 5 }}
-      >
-        <FontAwesome6
-          name={unfoldShelf ? "chevron-up" : "chevron-down"}
-          size={24}
-          color="black"
-        />
-      </Pressable>
+      {books.length > 3 && (
+        <Pressable
+          onPress={() => setUnfoldShelf(!unfoldShelf)}
+          style={{ alignSelf: "center", paddingVertical: 5 }}
+        >
+          <FontAwesome6
+            name={unfoldShelf ? "chevron-up" : "chevron-down"}
+            size={24}
+            color="black"
+          />
+        </Pressable>
+      )}
     </View>
   );
 };

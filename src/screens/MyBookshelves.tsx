@@ -2,33 +2,21 @@ import {
   View,
   Text,
   Pressable,
-  Image,
   StyleSheet,
   TextInput,
   Platform,
   ScrollView,
-  FlatList,
   Dimensions,
+  Modal,
 } from "react-native";
-import Checkbox from "expo-checkbox";
 import React, { useCallback, useEffect, useState } from "react";
-import { Dropdown } from "react-native-element-dropdown";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { FIREBASE_AUTH } from "../../firebaseConfig";
-import { showToast } from "../utils/Toasts";
-import {
-  NavigationProp,
-  RouteProp,
-  useFocusEffect,
-} from "@react-navigation/native";
-import { useAuth } from "../contexts/AuthContext";
+import { NavigationProp, useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 import { useUserContext } from "../contexts/UserContext";
 import colors from "../constants/colors";
-import Config from "react-native-config";
 import Bookshelf from "../components/Bookshelf";
 
 interface IRouterProps {
@@ -43,11 +31,8 @@ const defaultUserInfo = {
 
 const MyBookshelves = ({ navigation }: IRouterProps) => {
   const { state, dispatch } = useUserContext();
-  const [userInfo, setUserInfo] = useState(defaultUserInfo);
-  const { isLoggedIn, setIsLoggedIn, setIsSignedUp } = useAuth();
-  const [uid, setUid] = useState("");
-  const [books, setBooks] = useState([]);
-  const [unfoldShelf, setUnfoldShelf] = useState(false);
+  const [newShelfModal, setNewShelfModal] = useState(false);
+  const [newShelf, setNewShelf] = useState("");
   const [shelves, setShelves] = useState({
     tbr: [],
     wishlist: [],
@@ -69,7 +54,7 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
         `http://192.168.0.49:5000/bookshelf/${state.bookshelf}`
       );
       if (bookshelf.data) {
-        console.log("got bookshel", bookshelf.data);
+        console.log("got bookshelf", bookshelf.data);
         setShelves(bookshelf.data.bookshelf);
       }
     } catch (error) {
@@ -77,32 +62,21 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
     }
   };
 
-  // useEffect(() => {
-  //   getBooks();
-  // }, []);
+  const createNewShelf = async () => {
+    console.log("state bokkshelf", state.bookshelf);
 
-  // const getBooks = async () => {
-  //   try {
-  //     const books = await axios.get("http://192.168.0.49:5000/books", {
-  //       params: { books: state.bookshelf },
-  //     });
-  //     if (books.data) setBooks(books.data.books);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (unfoldShelf) {
-  //     const bloop = [];
-  //     for (let i = 0; i < books.length; i += 3) {
-  //       console.log(books.slice(i, i + 3));
-
-  //       bloop.push(books.slice(i, i + 3));
-  //     }
-  //     setShelves(bloop);
-  //   }
-  // }, [unfoldShelf]);
+    try {
+      const bookshelf = await axios.patch(
+        `http://192.168.0.49:5000/bookshelf/${state.bookshelf}/newShelf`,
+        {
+          name: newShelf,
+        }
+      );
+      if (bookshelf.status === 201) setNewShelfModal(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.pageLayout}>
@@ -122,7 +96,7 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
         >
           My Bookshelves
         </Text>
-        <Pressable style={{}}>
+        <Pressable onPress={() => setNewShelfModal(true)}>
           <FontAwesome5 name="plus" size={30} color="black" />
         </Pressable>
       </View>
@@ -137,77 +111,25 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
           navigation={navigation}
         />
       ))}
-      {/* <View style={styles.bookshelfBg}>
-        <View style={styles.shelfHeader}>
-          <Text style={{ fontSize: 18, padding: 15 }}>All</Text>
-          <Pressable
-            onPress={() => setUnfoldShelf(!unfoldShelf)}
-            style={{ marginRight: 15 }}
-          >
-            <FontAwesome6 name="chevron-down" size={24} color="black" />
+
+      <Modal
+        animationType="slide"
+        visible={newShelfModal}
+        onRequestClose={() => setNewShelfModal(false)}
+      >
+        <View style={{ paddingVertical: 50, paddingHorizontal: 20, gap: 20 }}>
+          <Text>How do you want to name this new shelf ?</Text>
+          <TextInput
+            style={styles.input}
+            value={newShelf}
+            placeholder="Shelf name"
+            onChangeText={(text) => setNewShelf(text)}
+          />
+          <Pressable style={styles.btnPrimary} onPress={() => createNewShelf()}>
+            <Text style={styles.btnText}>Create new shelf</Text>
           </Pressable>
         </View>
-        {unfoldShelf ? (
-          shelves.map((shelf, index) => (
-            <React.Fragment key={index}>
-              <View style={styles.booksContainer}>
-                <FlatList
-                  horizontal={true}
-                  data={shelf}
-                  renderItem={({ item }) => (
-                    <Pressable style={styles.book}>
-                      <FontAwesome
-                        style={styles.deleteBook}
-                        name="times-circle"
-                        size={24}
-                        color="white"
-                      />
-                      <Image
-                        style={styles.thumbnail}
-                        source={{
-                          uri: item.thumbnail,
-                        }}
-                      />
-                    </Pressable>
-                  )}
-                  keyExtractor={(item) => item.title}
-                  scrollEnabled={false}
-                />
-              </View>
-              <View style={styles.bookshelf}></View>
-              <View style={styles.bookshelfThickness}></View>
-            </React.Fragment>
-          ))
-        ) : (
-          <>
-            <View style={styles.booksContainer}>
-              <FlatList
-                horizontal={true}
-                data={books}
-                renderItem={({ item }) => (
-                  <Pressable style={styles.book}>
-                    <FontAwesome
-                      style={styles.deleteBook}
-                      name="times-circle"
-                      size={24}
-                      color="white"
-                    />
-                    <Image
-                      style={styles.thumbnail}
-                      source={{
-                        uri: item.thumbnail,
-                      }}
-                    />
-                  </Pressable>
-                )}
-                keyExtractor={(item) => item.title}
-              />
-            </View>
-            <View style={styles.bookshelf}></View>
-            <View style={styles.bookshelfThickness}></View>
-          </>
-        )}
-      </View> */}
+      </Modal>
     </ScrollView>
   );
 };
