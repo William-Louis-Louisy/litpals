@@ -28,6 +28,7 @@ import { useUserContext } from "../contexts/UserContext";
 import colors from "../constants/colors";
 import Config from "react-native-config";
 import debounce from "lodash.debounce";
+import BookSearch from "../components/BookSearch";
 
 interface IRouterProps {
   navigation: NavigationProp<any, any>;
@@ -218,65 +219,6 @@ const Browse = ({ navigation }: IRouterProps) => {
         />
       </View>
     </View>
-    // <View style={{ flex: 1, backgroundColor: "coral" }}>
-    //   <Animated.View style={{ height: headerHeight, backgroundColor: "pink" }}>
-    //     <Animated.Image
-    //       source={{
-    //         uri: "https://m.media-amazon.com/images/I/81ThRaHZbFL._SY466_.jpg",
-    //       }}
-    //       style={{ height: imageHeight, width: imageHeight }}
-    //     />
-    //     <Animated.Text style={{ opacity: titleOpacity }}>
-    //       Book Title
-    //     </Animated.Text>
-    //     <Animated.Text style={{ opacity: titleOpacity }}>
-    //       Author Name
-    //     </Animated.Text>
-    //   </Animated.View>
-    //   {Number(showContent) === 1 && <Text>coucou</Text>}
-
-    //   <Animated.ScrollView
-    //     contentContainerStyle={{ paddingTop: 50, backgroundColor: "lightblue" }} // Ensure there's space for the header
-    //     onScroll={Animated.event(
-    //       [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    //       { useNativeDriver: false }
-    //     )}
-    //     scrollEventThrottle={16}
-    //   >
-    //     {/* Second part of the content */}
-    //     <View>
-    //       <Text style={{ fontSize: 30 }}>
-    //         This is where the rest of the book details will go. The content here
-    //         will be scrollable and the header will shrink as you scroll. This is
-    //         where the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll. This is where
-    //         the rest of the book details will go. The content here will be
-    //         scrollable and the header will shrink as you scroll.
-    //       </Text>
-    //       {/* More content here */}
-    //     </View>
-    //   </Animated.ScrollView>
-    // </View>
   );
 };
 

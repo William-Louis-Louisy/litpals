@@ -7,6 +7,7 @@ import React, {
 } from "react";
 
 interface IUserData {
+  _id: string;
   uid: string;
   personalInfo: {
     avatar: string;
@@ -38,6 +39,7 @@ interface IUserData {
 }
 
 const initialState: IUserData = {
+  _id: "",
   uid: "",
   personalInfo: {
     avatar: "",

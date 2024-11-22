@@ -9,7 +9,7 @@ import ReadingPreferences from "../components/ReadingPreferences";
 import InitialBookshelf2 from "../components/InitialBookshelf2";
 import { useAuth } from "../contexts/AuthContext";
 import { useUserContext } from "../contexts/UserContext";
-import { IBookSample, IBookshelfData } from "../interfaces/bookshelf.interface";
+import { IInitialBookshelf, IShelf } from "../interfaces/bookshelf.interface";
 
 const defaultUserInfo = {
   uid: "",
@@ -34,15 +34,15 @@ const defaultUserInfo = {
     favoriteTropes: [] as string[],
     favoriteAuthors: [] as string[],
   },
-  bookshelf: "",
+  bookshelf: [] as IShelf[],
 };
 
-const defaultBookshelf = {
-  tbr: [] as IBookSample[],
-  wishlist: [] as IBookSample[],
-  reading: [] as IBookSample[],
-  read: [] as IBookSample[],
-  favorites: [] as IBookSample[],
+const defaultBookshelf: IInitialBookshelf = {
+  tbr: [],
+  wishlist: [],
+  reading: [],
+  read: [],
+  favorites: [],
 };
 
 const SignUpProcess = ({ navigation }: any) => {
@@ -50,7 +50,7 @@ const SignUpProcess = ({ navigation }: any) => {
   const { setIsSignedUp, setIsLoggedIn } = useAuth();
   const [step, setStep] = useState(1);
   const [userInfo, setUserInfo] = useState(defaultUserInfo);
-  const [bookshelf, setBookshelf] = useState<IBookshelfData>(defaultBookshelf);
+  const [bookshelf, setBookshelf] = useState(defaultBookshelf);
 
   useEffect(() => {
     setUserInfo({ ...userInfo, uid: state.uid });
@@ -63,14 +63,14 @@ const SignUpProcess = ({ navigation }: any) => {
 
   const submitUserData = async () => {
     try {
-      console.log("DATA COLLECTED", userInfo);
+      console.log("DATA COLLECTED", userInfo, bookshelf);
 
-      const data = await axios.post(`http://192.168.0.49:5000/users`, {
+      const data = await axios.post(`http://192.168.0.49:5000/user`, {
         user: userInfo,
         bookshelf: bookshelf,
       });
 
-      if (data.data) console.log("hola que tal");
+      if (data.data) console.log("hola que tal", data.data);
 
       //   if (data.data) {
       if (data.status === 201) {
@@ -86,6 +86,13 @@ const SignUpProcess = ({ navigation }: any) => {
               country: userInfo.country,
               city: userInfo.city,
             },
+          },
+        });
+        dispatch({
+          type: "UPDATE_FIELD",
+          payload: {
+            field: "_id",
+            value: data.data.user,
           },
         });
         console.log("wilkommen");

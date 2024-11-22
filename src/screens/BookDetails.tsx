@@ -17,6 +17,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Octicons from "@expo/vector-icons/Octicons";
 import axios from "axios";
 import { useUserContext } from "../contexts/UserContext";
+import Bookshelf from "../components/Bookshelf";
 
 interface IRouterProps {
   navigation: NavigationProp<any, any>;
@@ -34,7 +35,7 @@ interface IRouterProps {
         maturity: string;
         description: string;
         thumbnail: string;
-        shelf: string;
+        shelfType: string;
       };
     },
     "params"
@@ -43,20 +44,36 @@ interface IRouterProps {
 
 const BookDetails = ({ navigation, route }: IRouterProps) => {
   const boook = route.params;
-  const [status, setStatus] = useState(boook.shelf);
+  const [status, setStatus] = useState(boook.shelfType);
   const [seeFullDesc, setSeeFullDesc] = useState(false);
   const { state } = useUserContext();
+
+  useEffect(() => {
+    if (!boook.shelfType) {
+      checkBookStatus();
+    }
+  }, []);
+
+  const checkBookStatus = async () => {
+    const bookStatus = await axios.get(
+      `http://192.168.0.49:5000/user/${state.uid}/check-book-status/${boook.id}`
+    );
+    if (bookStatus) {
+      const shelf = bookStatus.data.shelf.type;
+      setStatus(shelf);
+    }
+  };
 
   const selectStatus = async (selectedStatus: string) => {
     status !== selectedStatus ? setStatus(selectedStatus) : setStatus("");
 
-    console.log(boook.shelf, selectedStatus, status);
+    console.log(boook.shelfType, selectedStatus, status);
 
     try {
       const bookshelfUpdate = await axios.patch(
-        `http://192.168.0.49:5000/bookshelf/${state.bookshelf}`,
+        `http://192.168.0.49:5000/user/${state.uid}/bookshelf`,
         {
-          previousShelf: boook.shelf,
+          previousShelf: boook.shelfType,
           shelf: selectedStatus,
           bookId: boook.id,
           thumbnail: boook.thumbnail,

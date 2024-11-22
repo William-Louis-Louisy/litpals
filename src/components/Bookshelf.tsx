@@ -20,7 +20,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { IBookSample } from "../interfaces/bookshelf.interface";
 import { capitalize } from "../utils/Helpers";
 
-const Bookshelf = ({ navigation, shelfName, books }: any) => {
+const Bookshelf = ({ navigation, shelf }: any) => {
   const { state, dispatch } = useUserContext();
   const [uid, setUid] = useState("");
   // const [books, setBooks] = useState([]);
@@ -66,10 +66,10 @@ const Bookshelf = ({ navigation, shelfName, books }: any) => {
   useEffect(() => {
     if (unfoldShelf) {
       const bookshelves = [];
-      for (let i = 0; i < books.length; i += 3) {
-        console.log(books.slice(i, i + 3));
+      for (let i = 0; i < shelf.books.length; i += 3) {
+        console.log(shelf.books.slice(i, i + 3));
 
-        bookshelves.push(books.slice(i, i + 3));
+        bookshelves.push(shelf.books.slice(i, i + 3));
       }
       setShelves(bookshelves);
     }
@@ -93,7 +93,7 @@ const Bookshelf = ({ navigation, shelfName, books }: any) => {
       maturity: book.data.volumeInfo.maturityRating,
       description: book.data.volumeInfo.description,
       thumbnail: book.data.volumeInfo.imageLinks.smallThumbnail,
-      shelf: shelfName,
+      shelfType: shelf.type,
     });
   };
 
@@ -108,9 +108,9 @@ const Bookshelf = ({ navigation, shelfName, books }: any) => {
             fontFamily: "Nunito-Bold",
           }}
         >
-          {shelfName === "tbr"
-            ? shelfName.toUpperCase()
-            : capitalize(shelfName)}
+          {shelf.type === "tbr"
+            ? shelf.name.toUpperCase()
+            : capitalize(shelf.name)}
         </Text>
         <Pressable style={{ marginRight: 15, padding: 5, paddingBottom: 3 }}>
           <FontAwesome5 name="ellipsis-v" size={20} color="black" />
@@ -153,7 +153,7 @@ const Bookshelf = ({ navigation, shelfName, books }: any) => {
           <View style={styles.booksContainer}>
             <FlatList
               horizontal={true}
-              data={books}
+              data={shelf.books}
               renderItem={({ item }) => (
                 <Pressable
                   style={styles.book}
@@ -180,7 +180,7 @@ const Bookshelf = ({ navigation, shelfName, books }: any) => {
           <View style={styles.bookshelfThickness}></View>
         </>
       )}
-      {books.length > 3 && (
+      {shelf.books.length > 3 && (
         <Pressable
           onPress={() => setUnfoldShelf(!unfoldShelf)}
           style={{ alignSelf: "center", paddingVertical: 5 }}

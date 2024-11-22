@@ -23,23 +23,15 @@ interface IRouterProps {
   navigation: NavigationProp<any, any>;
 }
 
-const defaultUserInfo = {
-  gender: "",
-  country: "",
-  city: "",
-};
-
 const MyBookshelves = ({ navigation }: IRouterProps) => {
-  const { state, dispatch } = useUserContext();
+  const { state } = useUserContext();
   const [newShelfModal, setNewShelfModal] = useState(false);
   const [newShelf, setNewShelf] = useState("");
-  const [shelves, setShelves] = useState({
-    tbr: [],
-    wishlist: [],
-    reading: [],
-    read: [],
-    favorites: [],
-  });
+  const [shelves, setShelves] = useState([]);
+
+  useEffect(() => {
+    console.log("BOOKSHELF", shelves);
+  }, [shelves]);
 
   useFocusEffect(
     useCallback(() => {
@@ -49,12 +41,16 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
   );
 
   const getBookshelf = async () => {
+    console.log("state uid", state.uid);
+
     try {
       const bookshelf = await axios.get(
-        `http://192.168.0.49:5000/bookshelf/${state.bookshelf}`
+        `http://192.168.0.49:5000/user/${state.uid}/bookshelf`
       );
+      if (bookshelf) console.log(bookshelf);
+
       if (bookshelf.data) {
-        console.log("got bookshelf", bookshelf.data);
+        console.log("got bookshelf", bookshelf.data.bookshelf);
         setShelves(bookshelf.data.bookshelf);
       }
     } catch (error) {
@@ -100,17 +96,19 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
           <FontAwesome5 name="plus" size={30} color="black" />
         </Pressable>
       </View>
-      {/* {shelves.map((shelf) => {
-        return <Bookshelf navigation={navigation} title={shelf} />;
-      })} */}
-      {Object.entries(shelves).map(([shelfName, books]) => (
+      {shelves.map((shelf: any) => {
+        return (
+          <Bookshelf key={shelf.name} shelf={shelf} navigation={navigation} />
+        );
+      })}
+      {/* {Object.entries(shelves).map(([shelfName, books]) => (
         <Bookshelf
           key={shelfName}
           shelfName={shelfName}
           books={books}
           navigation={navigation}
         />
-      ))}
+      ))} */}
 
       <Modal
         animationType="slide"

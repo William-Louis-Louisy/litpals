@@ -13,11 +13,11 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import colors from "../constants/colors";
 import BookSearch from "./BookSearch";
-import { IBookshelfData } from "../interfaces/bookshelf.interface";
+import { IInitialBookshelf } from "../interfaces/bookshelf.interface";
 
 interface IProps {
-  bookshelf: IBookshelfData;
-  setBookshelf: Dispatch<SetStateAction<IBookshelfData>>;
+  bookshelf: IInitialBookshelf;
+  setBookshelf: Dispatch<SetStateAction<IInitialBookshelf>>;
 }
 
 const InitialBookshelf = ({ bookshelf, setBookshelf }: IProps) => {
@@ -60,7 +60,7 @@ const InitialBookshelf = ({ bookshelf, setBookshelf }: IProps) => {
             <View style={styles.booksContainer}>
               <FlatList
                 horizontal={true}
-                data={favoriteBooks}
+                data={bookshelf.favorites}
                 renderItem={({ item }) => (
                   <Pressable style={styles.book}>
                     <FontAwesome
@@ -138,7 +138,7 @@ const InitialBookshelf = ({ bookshelf, setBookshelf }: IProps) => {
             <View style={styles.booksContainer}>
               <FlatList
                 horizontal={true}
-                data={currentRead}
+                data={bookshelf.reading}
                 renderItem={({ item }) => (
                   <Pressable style={styles.book}>
                     <FontAwesome

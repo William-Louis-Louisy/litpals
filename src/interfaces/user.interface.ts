@@ -1,3 +1,5 @@
+import { IShelf } from "./bookshelf.interface";
+
 export interface IUserData {
   uid: string;
   avatar: string;
@@ -21,5 +23,5 @@ export interface IUserData {
     favoriteTropes: string[];
     favoriteAuthors: string[];
   };
-  bookshelf: string; //id
+  bookshelf: IShelf[];
 }
