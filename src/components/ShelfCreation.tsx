@@ -40,10 +40,6 @@ const ShelfCreation = ({ challenge, setChallenge }: any) => {
         }
       );
 
-      console.log(
-        response.data.items.map((book: any) => book.volumeInfo.title)
-      );
-
       setBooksDropdown(
         response.data.items.filter(
           (item: any) =>

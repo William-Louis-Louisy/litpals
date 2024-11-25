@@ -46,8 +46,6 @@ const Profile = ({ navigation }: IRouterProps) => {
   const [userInfo, setUserInfo] = useState<IUserData>();
 
   useEffect(() => {
-    console.log("HELLO????", state);
-
     try {
       onAuthStateChanged(FIREBASE_AUTH, (user) => {
         if (user) {

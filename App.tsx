@@ -69,13 +69,6 @@ export default function App() {
 
   // const [user, setUser] = useState<User | null>(null);
 
-  // useEffect(() => {
-  //   onAuthStateChanged(FIREBASE_AUTH, (user) => {
-  //     console.log("USER", user);
-  //     setUser(user);
-  //   });
-  // }, []);
-
   return (
     <AuthProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: "#FDF5ED" }}>

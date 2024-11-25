@@ -45,27 +45,6 @@ const Browse = ({ navigation }: IRouterProps) => {
   const [booklist, setBooklist] = useState([]);
   const [currentBookDetail, setCurrentBookDetail] = useState({} as any);
 
-  // useEffect(() => {
-  //   try {
-  //     onAuthStateChanged(FIREBASE_AUTH, (user) => {
-  //       if (user) {
-  //         // User is signed in, see docs for a list of available properties
-  //         // https://firebase.google.com/docs/reference/js/auth.user
-  //         const uid = user.uid;
-  //         console.log("UUUUUUIIIIIDDDDD", uid);
-  //         setUid(uid);
-  //         // ...
-  //       } else {
-  //         // User is signed out
-  //         // ...
-  //         console.log("USER IN NOT LOGGED IN");
-  //       }
-  //     });
-  //   } catch (error: any) {
-  //     console.log("bllop", error.code);
-  //   }
-  // }, []);
-
   const getBooks = async () => {
     try {
       const response = await axios.get(
@@ -79,8 +58,6 @@ const Browse = ({ navigation }: IRouterProps) => {
           },
         }
       );
-
-      console.log(response.data.items[0]);
 
       setBooklist(
         response.data.items.filter(
@@ -127,8 +104,6 @@ const Browse = ({ navigation }: IRouterProps) => {
     outputRange: [1, 0],
     extrapolate: "clamp",
   });
-
-  console.log(Number(showContent) === 1, "coucou");
 
   return (
     <View style={styles.pageLayout}>

@@ -7,6 +7,7 @@ import {
   Platform,
   FlatList,
   Dimensions,
+  Modal,
 } from "react-native";
 import React, { Fragment, useEffect, useState } from "react";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
@@ -19,6 +20,7 @@ import colors from "../constants/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { IBookSample } from "../interfaces/bookshelf.interface";
 import { capitalize } from "../utils/Helpers";
+import BookSearch from "./BookSearch";
 
 const Bookshelf = ({ navigation, shelf }: any) => {
   const { state, dispatch } = useUserContext();
@@ -26,27 +28,9 @@ const Bookshelf = ({ navigation, shelf }: any) => {
   // const [books, setBooks] = useState([]);
   const [unfoldShelf, setUnfoldShelf] = useState(false);
   const [shelves, setShelves] = useState([] as any[]);
-
-  // useEffect(() => {
-  //   try {
-  //     onAuthStateChanged(FIREBASE_AUTH, (user) => {
-  //       if (user) {
-  //         // User is signed in, see docs for a list of available properties
-  //         // https://firebase.google.com/docs/reference/js/auth.user
-  //         const uid = user.uid;
-  //         // console.log("UUUUUUIIIIIDDDDD", uid);
-  //         setUid(uid);
-  //         // ...
-  //       } else {
-  //         // User is signed out
-  //         // ...
-  //         console.log("USER IN NOT LOGGED IN");
-  //       }
-  //     });
-  //   } catch (error: any) {
-  //     console.log("bllop", error.code);
-  //   }
-  // }, []);
+  const [openEllipsis, setOpenEllipsis] = useState(false);
+  const [openBookSearch, setOpenBookSearch] = useState(false);
+  const [selectedBooks, setSelectedBooks] = useState([] as any);
 
   // useEffect(() => {
   //   getBooks();
@@ -67,19 +51,43 @@ const Bookshelf = ({ navigation, shelf }: any) => {
     if (unfoldShelf) {
       const bookshelves = [];
       for (let i = 0; i < shelf.books.length; i += 3) {
-        console.log(shelf.books.slice(i, i + 3));
-
         bookshelves.push(shelf.books.slice(i, i + 3));
       }
       setShelves(bookshelves);
     }
   }, [unfoldShelf]);
 
+  useEffect(() => {
+    if (selectedBooks.length > 0) {
+      shelf.books.push(...selectedBooks);
+      addBooksToShelf();
+    }
+  }, [selectedBooks]);
+
+  const addBooksToShelf = async () => {
+    try {
+      const bookshelfUpdate = await axios.patch(
+        `http://192.168.0.49:5000/user/${state.uid}/bookshelf`,
+        {
+          previousShelf: undefined,
+          shelf: shelf.name,
+          bookId: selectedBooks[0].id,
+          thumbnail: selectedBooks[0].thumbnail,
+        }
+      );
+
+      if (bookshelfUpdate.data) {
+        setSelectedBooks([]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleSelectedBook = async (bookId: string) => {
     const book = await axios.get(
       `https://www.googleapis.com/books/v1/volumes/${bookId}`
     );
-    console.log("book data", book.data.id, book.data.volumeInfo.title);
 
     navigation.navigate("BookDetails", {
       id: book.data.id,
@@ -112,9 +120,34 @@ const Bookshelf = ({ navigation, shelf }: any) => {
             ? shelf.name.toUpperCase()
             : capitalize(shelf.name)}
         </Text>
-        <Pressable style={{ marginRight: 15, padding: 5, paddingBottom: 3 }}>
+        <Pressable
+          style={{ marginRight: 15, padding: 5, paddingBottom: 3 }}
+          onPress={() => setOpenEllipsis(!openEllipsis)}
+        >
           <FontAwesome5 name="ellipsis-v" size={20} color="black" />
         </Pressable>
+        {openEllipsis && (
+          <View
+            style={{
+              backgroundColor: "white",
+              position: "absolute",
+              right: 0,
+              zIndex: 8,
+              transform: [{ translateY: "100%" }],
+            }}
+          >
+            <Pressable
+              onPress={() => {
+                setOpenBookSearch(true);
+                setOpenEllipsis(false);
+              }}
+            >
+              <Text>Add books to shelf</Text>
+            </Pressable>
+            <Text>Delete books from shelf</Text>
+            {shelf.type === "custom" && <Text>Rename shelf</Text>}
+          </View>
+        )}
       </View>
 
       {unfoldShelf ? (
@@ -192,6 +225,21 @@ const Bookshelf = ({ navigation, shelf }: any) => {
           />
         </Pressable>
       )}
+
+      {/* SEARCH BOOKS MODAL */}
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={openBookSearch}
+        onRequestClose={() => setOpenBookSearch(false)}
+      >
+        <BookSearch
+          origin={"signup"}
+          setOpenBookSearch={setOpenBookSearch}
+          selectedBooks={selectedBooks}
+          setSelectedBooks={setSelectedBooks}
+        />
+      </Modal>
     </View>
   );
 };
@@ -203,6 +251,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
+    position: "relative",
   },
   deleteBook: {
     position: "absolute",

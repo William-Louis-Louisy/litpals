@@ -94,8 +94,6 @@ const UserContext = createContext<UserContextType>(defaultContextValue);
 function userReducer(state: IUserData, action: Action) {
   switch (action.type) {
     case "UPDATE_FIELD":
-      // if (action.payload.field === "uid") console.log("UIDDDDD");
-
       return { ...state, [action.payload.field]: action.payload.value };
     case "RESET":
       return initialState;

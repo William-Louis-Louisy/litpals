@@ -29,28 +29,19 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
   const [newShelf, setNewShelf] = useState("");
   const [shelves, setShelves] = useState([]);
 
-  useEffect(() => {
-    console.log("BOOKSHELF", shelves);
-  }, [shelves]);
-
   useFocusEffect(
     useCallback(() => {
-      console.log("BOOKSHELVES INIT", state.bookshelf);
       getBookshelf();
     }, [])
   );
 
   const getBookshelf = async () => {
-    console.log("state uid", state.uid);
-
     try {
       const bookshelf = await axios.get(
         `http://192.168.0.49:5000/user/${state.uid}/bookshelf`
       );
-      if (bookshelf) console.log(bookshelf);
 
       if (bookshelf.data) {
-        console.log("got bookshelf", bookshelf.data.bookshelf);
         setShelves(bookshelf.data.bookshelf);
       }
     } catch (error) {
@@ -59,16 +50,16 @@ const MyBookshelves = ({ navigation }: IRouterProps) => {
   };
 
   const createNewShelf = async () => {
-    console.log("state bokkshelf", state.bookshelf);
-
     try {
       const bookshelf = await axios.patch(
-        `http://192.168.0.49:5000/bookshelf/${state.bookshelf}/newShelf`,
+        `http://192.168.0.49:5000/user/${state.uid}/new-shelf`,
         {
-          name: newShelf,
+          shelfName: newShelf,
         }
       );
-      if (bookshelf.status === 201) setNewShelfModal(false);
+      if (bookshelf.status === 201) {
+        setNewShelfModal(false);
+      }
     } catch (error) {
       console.log(error);
     }

@@ -38,7 +38,6 @@ const BookChallenge = ({ navigation }: any) => {
   const navigateToNext = () => {
     if (step === 3) {
       navigation.navigate("Profile");
-      console.log("challenge", challenge);
     } else setStep(step + 1);
   };
 

@@ -63,16 +63,11 @@ const SignUpProcess = ({ navigation }: any) => {
 
   const submitUserData = async () => {
     try {
-      console.log("DATA COLLECTED", userInfo, bookshelf);
-
       const data = await axios.post(`http://192.168.0.49:5000/user`, {
         user: userInfo,
         bookshelf: bookshelf,
       });
 
-      if (data.data) console.log("hola que tal", data.data);
-
-      //   if (data.data) {
       if (data.status === 201) {
         dispatch({
           type: "UPDATE_FIELD",
@@ -95,8 +90,6 @@ const SignUpProcess = ({ navigation }: any) => {
             value: data.data.user,
           },
         });
-        console.log("wilkommen");
-
         setIsSignedUp(false);
         setIsLoggedIn(true);
       }
